@@ -15,7 +15,9 @@ ghc-options: -Wall
 
 dependencies:
   - base >=4.7 && <5
+  - host-and-port
   - network
+  - optparse-applicative
 
 library:
   source-dirs: src
