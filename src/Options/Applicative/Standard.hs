@@ -1,7 +1,7 @@
 {-# LANGUAGE NoImplicitPrelude #-}
 {-# LANGUAGE TypeFamilies #-}
 -- |
--- Module:      Options.Applicative.Standard.Options
+-- Module:      Options.Applicative.Standard
 -- Description: Standard\/common options and arguments used by command-line
 --              applications.
 -- Copyright:   (c) 2017 Peter Trško
@@ -15,7 +15,7 @@
 --
 -- Parts were inspired by <http://tldp.org/LDP/abs/html/standard-options.html>
 -- and <http://www.catb.org/esr/writings/taoup/html/ch10s05.html>.
-module Options.Applicative.Standard.Options
+module Options.Applicative.Standard
     (
     -- * Version Information
       version
