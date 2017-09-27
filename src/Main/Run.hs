@@ -21,6 +21,9 @@ module Main.Run
     -- * Application Runtime
     , InitAppRuntimeException(..)
     , withRuntime
+
+    -- * Utilities
+    , applySimpleDefaults
     )
   where
 
@@ -91,7 +94,7 @@ instance Exception ReadConfigException
 -- >              V
 -- >    ┌───────────────────┐
 -- >    │ Application mode, │
--- >    │      options,     │──────┐
+-- >    │      options,     ├──────┐
 -- >    │ and configuration │      │
 -- >    └─────────┬─────────┘      │ forall a. mode a
 -- >              │                │
@@ -99,7 +102,7 @@ instance Exception ReadConfigException
 -- >              │     ┌─────────────────────┐
 -- >  mode config │     │     Read & parse    │
 -- >              │     │ configuration  file │
--- >              │     └─────────────────────┘
+-- >              │     └──────────┬──────────┘
 -- >              │                │
 -- >              V                │  Either String (Endo config)
 -- >   ┌─────────────────────┐     │
@@ -152,20 +155,24 @@ instance Exception ReadConfigException
 --
 -- @
 -- main :: 'IO' ()
--- main = 'runAppWith' parseOptions readConfig defaultAppMode '$' \\case
+-- main = 'runAppWith' parseOptions readConfig applyDefaults '$' \\case
 --     ShowManPage -> 'System.Environment.getProgName' >>= runMan
 --     RunApp NonConfigOptions{config} -> appMain config
+--   where
+--     applyDefaults = applySimpleDefaults defaultAppMode
 -- @
 --
 -- @
 -- main :: 'IO' ()
--- main = do
+-- main =
 --     -- Global configuration may be broader then user configuration, e.g. it
 --     -- may contain things that can be used in user configuration.
---     defaultAppMode <- readGlobalConfig
---     'runAppWith' parseOptions readConfig defaultAppMode '$'  \\case
+--     'runAppWith' parseOptions readConfig readAndApplyGlobalConfig '$' \\case
 --         ShowManPage -> 'System.Environment.getProgName' >>= runMan
 --         RunApp NonConfigOptions{config} -> appMain config
+--   where
+--     readAndApplyGlobalConfig :: Endo (AppMode Config) -> IO (AppMode Config)
+--     readAndApplyGlobalConfig = ...
 -- @
 runAppWith
     :: forall mode config
@@ -184,13 +191,13 @@ runAppWith
     -- 'ReadConfigException' and thrown. If the function throws an excepthin,
     -- then that exception is also wrapped in 'ReadConfigException'. Purpose of
     -- this is to add more meaning to the error\/exception.
-    -> mode config
-    -- ^ Default application mode and configuration.
+    -> (Endo (mode config) -> IO (mode config))
+    -- ^ Apply defaults, in the simplest cases this is just 'appEndoA'
     -> (mode config -> IO ())
     -- ^ Application main that takes mode and configuration.
     -> IO ()
-runAppWith parseOptions readConfig def appMain =
-    parseOptions >>= (`appEndoA` def) >>= readAndApplyConfig >>= appMain
+runAppWith parseOptions readConfig applyDefaults appMain =
+    parseOptions >>= applyDefaults >>= readAndApplyConfig >>= appMain
   where
     readAndApplyConfig mode = (\e -> appEndo e <$> mode) <$> readConfig' mode
 
@@ -198,7 +205,6 @@ runAppWith parseOptions readConfig def appMain =
         (readConfig mode `catch` (readConfigException . Left))
             >>= fromLeftA (readConfigException . Right)
 
-    appEndoA = (pure .) . appEndo
     readConfigException = throwIO . ReadConfigException
 
 -- | Exception thrown when an application runtime failed to initialise.
@@ -247,15 +253,40 @@ instance Exception InitAppRuntimeException
 -- scafolding function. It just ilustrates why something like runtime
 -- configuration may be useful.
 --
+-- >   ┌───────────────────────┐
+-- >   │     Configuration     │
+-- >   └───────────┬───────────┘
+-- >               │
+-- >               V
+-- >   ┌───────────────────────┐
+-- >   │      Initialise       │
+-- >   │ runtime configuration │
+-- >   └───────────┬───────────┘
+-- >               │
+-- >               V
+-- >   ┌───────────────────────┐
+-- >   │    Run application    ├───┐
+-- >   └───────────┬───────────┘   │
+-- >               │               │
+-- >               │ success       │ failure
+-- >               │               │
+-- >               V               │
+-- >   ┌───────────────────────┐   │
+-- >   │        Destroy        │<──┘
+-- >   │ runtime configuration │
+-- >   └───────────────────────┘
+--
 -- Usage example:
 --
 -- @
 -- main :: 'IO' ()
--- main = 'runAppWith' parseOptions readConfig defaultAppMode '$' \\case
+-- main = 'runAppWith' parseOptions readConfig applyDefaults '$' \\case
 --     ShowManPage -> 'System.Environment.getProgName' >>= runMan
 --     RunApp NonConfigOptions{config} ->
 --         withRuntime initRuntime destroyRuntime config '$' \\runtime -> do
 --             ...
+--   where
+--     applyDefaults = applySimpleDefaults defaultAppMode
 -- @
 withRuntime
     :: forall config runtime
@@ -276,3 +307,9 @@ withRuntime init destroy cfg app = do
 
 fromLeftA :: Applicative f => (a -> f b) -> Either a b -> f b
 fromLeftA f = either f pure
+
+-- | Helper function for applying simple value to an endomorphism ('Endo').
+--
+-- See 'runAppWith' for usage examples.
+applySimpleDefaults :: Applicative f => a -> Endo a -> f a
+applySimpleDefaults def = pure . (`appEndo` def)
