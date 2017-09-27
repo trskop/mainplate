@@ -25,7 +25,7 @@ module Main.Run
   where
 
 import Control.Applicative (Applicative, pure)
-import Control.Exception (Exception, SomeException, catch, finally, throw)
+import Control.Exception (Exception, SomeException, catch, finally, throwIO)
 import Control.Monad ((>>=))
 import Data.Either (Either(Left, Right), either)
 import Data.Function ((.))
@@ -195,11 +195,11 @@ runAppWith parseOptions readConfig def appMain =
     readAndApplyConfig mode = (\e -> appEndo e <$> mode) <$> readConfig' mode
 
     readConfig' mode =
-        (readConfig mode >>= fromLeftA (readConfigException . Right))
-            `catch` (readConfigException . Left)
+        (readConfig mode `catch` (readConfigException . Left))
+            >>= fromLeftA (readConfigException . Right)
 
     appEndoA = (pure .) . appEndo
-    readConfigException = throw . ReadConfigException
+    readConfigException = throwIO . ReadConfigException
 
 -- | Exception thrown when an application runtime failed to initialise.
 --
@@ -267,12 +267,12 @@ withRuntime
     -> (runtime -> IO ())
     -> IO ()
 withRuntime init destroy cfg app = do
-    runtime <- (init cfg >>= fromLeftA (initAppRuntimeException . Right))
-        `catch` (initAppRuntimeException . Left)
+    runtime <- (init cfg `catch` (initAppRuntimeException . Left))
+        >>= fromLeftA (initAppRuntimeException . Right)
 
     app runtime `finally` destroy runtime
   where
-    initAppRuntimeException = throw . InitAppRuntimeException
+    initAppRuntimeException = throwIO . InitAppRuntimeException
 
 fromLeftA :: Applicative f => (a -> f b) -> Either a b -> f b
 fromLeftA f = either f pure
