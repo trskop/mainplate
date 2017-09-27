@@ -24,7 +24,7 @@ library:
   source-dirs: src
   exposed-modules:
     - Main.Run
-    - Options.Applicative.Standard.Options
+    - Options.Applicative.Standard
 
 # tests:
   # spec:
