@@ -86,6 +86,8 @@ import Options.Applicative
 import Options.Applicative.Builder.Internal (HasMetavar, HasName)
 
 
+-- {{{ Host and Port ----------------------------------------------------------
+
 -- | Parse argument of the form @HOST_NAME|IPV4_ADDR|IPV6_ADDR@.
 --
 -- See 'parseHost' for more information.
@@ -166,6 +168,10 @@ connectHostAndPort
 connectHostAndPort convertHost convertPort = eitherReader
     $ parseConnect >=> modifyHostAndPortWith convertHost convertPort
 
+-- }}} Host and Port ----------------------------------------------------------
+
+-- {{{ Version ----------------------------------------------------------------
+
 -- | Option for printing version information. It's defined either as
 -- @-V|--version@ or @-v|--version@ depending on the value of the first
 -- argument.
@@ -215,6 +221,27 @@ versionFlag
 versionFlag useUpperCase versionInfo =
     abortOption (InfoMsg versionInfo) $ version useUpperCase
 
+-- }}} Version ----------------------------------------------------------------
+
+-- {{{ Command Output ---------------------------------------------------------
+
+-- | Option for writing output into a file.
+--
+-- @
+-- -o FILE
+--     Write output into FILE.
+-- @
+output :: (HasName f, HasMetavar f) => Mod f a
+output = mconcat
+    [ short 'o'
+    , metavar "FILE"
+    , help "Write output into FILE."
+    ]
+
+-- }}} Command Output ---------------------------------------------------------
+
+-- {{{ Verbosity --------------------------------------------------------------
+
 -- | Option for suppressing unnecessary output.
 --
 -- @
@@ -250,19 +277,6 @@ silent = mconcat
 -- See 'silent' and 'Verbosity' for more details.
 silentFlag :: HasVerbosity a => Parser (a -> a)
 silentFlag = flag id (setVerbosity Silent) silent
-
--- | Option for writing output into a file.
---
--- @
--- -o FILE
---     Write output into FILE.
--- @
-output :: (HasName f, HasMetavar f) => Mod f a
-output = mconcat
-    [ short 'o'
-    , metavar "FILE"
-    , help "Write output into FILE."
-    ]
 
 -- | Option for printing additional diagnostic output.
 --
@@ -335,3 +349,5 @@ incrementVerbosityFlag =
         [ short 'v'
         , help "Increment verbosity by one level. Can be used multiple times."
         ]
+
+-- }}} Verbosity --------------------------------------------------------------
