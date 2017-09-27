@@ -2,7 +2,8 @@
 {-# LANGUAGE TypeFamilies #-}
 -- |
 -- Module:      Options.Applicative.Standard.Options
--- Description: Standard/common options used by command line applications.
+-- Description: Standard\/common options and arguments used by command-line
+--              applications.
 -- Copyright:   (c) 2017 Peter Trško
 -- License:     BSD3
 --
@@ -10,36 +11,51 @@
 -- Stability:   experimental
 -- Portability: GHC specific language extensions.
 --
--- Standard\/common options used by command line applications.
+-- Standard\/common options and arguments used by command-line applications.
+--
+-- Parts were inspired by <http://tldp.org/LDP/abs/html/standard-options.html>
+-- and <http://www.catb.org/esr/writings/taoup/html/ch10s05.html>.
 module Options.Applicative.Standard.Options
     (
+    -- * Version Information
+      version
+
+    -- * Command Output
+    , output
+
     -- * Host and Port
-      listenHostAndPort
+    , listenHostAndPort
     , listenHost
     , listenPort
     , connectHostAndPort
 
-    -- * Standard Command-Line Options
-    --
-    -- Inspired by <http://tldp.org/LDP/abs/html/standard-options.html> and
-    -- <http://www.catb.org/esr/writings/taoup/html/ch10s05.html>.
-    , version
+    -- * Verbosity
     , quiet
     , silent
-    , output
+    , silentFlag
     , verbose
+    , verboseFlag
+    , verbosity
+    , parseVerbosity
+    , verbosityOption
+    , incrementVerbosityFlag
     )
   where
 
+import Prelude (maxBound, minBound)
+
 import Control.Monad ((>=>))
 import Data.Bool (Bool)
-import Data.Either (Either)
-import Data.Function (($), (.))
+import Data.Either (Either(Left, Right))
+import Data.Function (($), (.), id)
 import Data.Functor (fmap)
-import Data.Monoid (mconcat)
+import Data.Maybe (maybe)
+import Data.Monoid ((<>), mconcat)
 import Data.String (String)
 import Data.Word (Word)
+import Text.Show (show)
 
+import Data.HostAndPort.Class (Host, HasHost, setHost, Port, HasPort, setPort)
 import Data.HostAndPort.Parse
     ( ParsedHost
     , modifyHostAndPortWith
@@ -48,18 +64,22 @@ import Data.HostAndPort.Parse
     , parseListen
     , parsePort
     )
-import Data.HostAndPort.Class (Host, HasHost, setHost, Port, HasPort, setPort)
+import Data.Verbosity (Verbosity(Silent, Verbose))
+import qualified Data.Verbosity as Verbosity (increment', parse)
+import Data.Verbosity.Class (HasVerbosity, modifyVerbosity, setVerbosity)
 import Options.Applicative
     ( Mod
 --  , ParseError(InfoMsg)
---  , Parser
+    , Parser
     , ReadM
 --  , abortOption
     , eitherReader
+    , flag
     , help
     , hidden
     , long
     , metavar
+    , option
     , short
     )
 import Options.Applicative.Builder.Internal (HasMetavar, HasName)
@@ -178,7 +198,7 @@ version useUpperCase = mconcat
 --
 -- @
 -- -q, --quiet
---   Quiet mode. Suppress normal diagnostic or result output.
+--     Quiet mode. Suppress normal diagnostic or result output.
 -- @
 quiet :: HasName f => Mod f a
 quiet = mconcat
@@ -191,7 +211,7 @@ quiet = mconcat
 --
 -- @
 -- -s, --silent
---   Silent mode. Suppress normal diagnostic or result output.
+--     Silent mode. Suppress normal diagnostic or result output.
 -- @
 silent :: HasName f => Mod f a
 silent = mconcat
@@ -200,11 +220,21 @@ silent = mconcat
     , help "Silent mode. Suppress normal diagnostic or result output."
     ]
 
+-- | Defined as:
+--
+-- @
+-- 'silentFlag' = 'flag' 'id' ('setVerbosity' 'Silent') 'silent'
+-- @
+--
+-- See 'silent' and 'Verbosity' for more details.
+silentFlag :: HasVerbosity a => Parser (a -> a)
+silentFlag = flag id (setVerbosity Silent) silent
+
 -- | Option for writing output into a file.
 --
 -- @
 -- -o FILE
---   Write output into FILE.
+--     Write output into FILE.
 -- @
 output :: (HasName f, HasMetavar f) => Mod f a
 output = mconcat
@@ -217,7 +247,7 @@ output = mconcat
 --
 -- @
 -- -v, --verbose
---   Verbose mode. Prints additional diagnostic output.
+--     Verbose mode. Prints additional diagnostic output.
 -- @
 verbose :: HasName f => Mod f a
 verbose = mconcat
@@ -225,3 +255,62 @@ verbose = mconcat
     , long "verbose"
     , help "Verbose mode. Prints additional diagnostic output."
     ]
+
+-- | Defined as:
+--
+-- @
+-- 'verboseFlag' = 'flag' 'id' ('setVerbosity' 'Verbose') 'verbose'
+-- @
+--
+-- See 'verbose' and 'Verbosity' for more details.
+verboseFlag :: HasVerbosity a => Parser (a -> a)
+verboseFlag = flag id (setVerbosity Verbose) verbose
+
+-- | Option for setting verbosity to a specified value.
+--
+-- @
+-- --verbosity=VERBOSITY
+--     Set verbosity level to VERBOSITY.
+-- @
+verbosity :: (HasName f, HasMetavar f) => Mod f a
+verbosity = mconcat
+    [ long "verbosity"
+    , metavar "VERBOSITY"
+    , help "Set verbosity level to VERBOSITY."
+    ]
+
+-- | Parse verbosity value and set it. These are recognized values: "silent",
+-- "normal", "verbose", and "annoying".
+parseVerbosity :: HasVerbosity a => ReadM (a -> a)
+parseVerbosity = eitherReader $ \s ->
+    maybe (invalidVerbosity s) (Right . setVerbosity) $ Verbosity.parse s
+  where
+    invalidVerbosity s = Left
+        $ "Invalid verbosity: " <> show s <> ": Verbosity can be only one of: "
+        <> show [minBound .. maxBound :: Verbosity]
+
+-- | Defined as:
+--
+-- @
+-- 'verbosityOption' = 'option' 'parseVerbosity' 'verbosity'
+-- @
+--
+-- See 'parseVerbosity' and 'verbosity' for more information.
+verbosityOption :: HasVerbosity a => Parser (a -> a)
+verbosityOption = option parseVerbosity verbosity
+
+-- | Flag for incrementing verbosity by one level. It can be used multiple
+-- times to increase it more.
+--
+-- @
+-- -v
+--     Increment verbosity by one level. Can be used multiple times.
+-- @
+--
+-- See 'Verbosity.increment'' for more details.
+incrementVerbosityFlag :: HasVerbosity a => Parser (a -> a)
+incrementVerbosityFlag =
+    flag id (modifyVerbosity Verbosity.increment') $ mconcat
+        [ short 'v'
+        , help "Increment verbosity by one level. Can be used multiple times."
+        ]

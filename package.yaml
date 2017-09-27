@@ -18,11 +18,13 @@ dependencies:
   - host-and-port
   - network
   - optparse-applicative
+  - verbosity
 
 library:
   source-dirs: src
   exposed-modules:
     - Main.Run
+    - Options.Applicative.Standard.Options
 
 # tests:
   # spec:
