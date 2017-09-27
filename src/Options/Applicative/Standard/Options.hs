@@ -19,6 +19,7 @@ module Options.Applicative.Standard.Options
     (
     -- * Version Information
       version
+    , versionFlag
 
     -- * Command Output
     , output
@@ -69,10 +70,10 @@ import qualified Data.Verbosity as Verbosity (increment', parse)
 import Data.Verbosity.Class (HasVerbosity, modifyVerbosity, setVerbosity)
 import Options.Applicative
     ( Mod
---  , ParseError(InfoMsg)
+    , ParseError(InfoMsg)
     , Parser
     , ReadM
---  , abortOption
+    , abortOption
     , eitherReader
     , flag
     , help
@@ -193,6 +194,26 @@ version useUpperCase = mconcat
     , help "Print version information and exit."
     , hidden
     ]
+
+-- | Defined as:
+--
+-- @
+-- 'versionFlag' useUpperCase versionInfo =
+--     'abortOption' ('InfoMsg' 'versionInfo') '$' 'version' useUpperCase
+-- @
+--
+-- See 'version' for more information.
+versionFlag
+    :: Bool
+    -- ^ Use uppercase 'V'? In other words if 'True' then the short option is
+    -- @-V@, and if 'False' then it's @-v@. This is so that version option can
+    -- be combined with e.g. verbosity option for which @-v@ is also commonly
+    -- used.
+    -> String
+    -- ^ Version information to be printed.
+    -> Parser (a -> a)
+versionFlag useUpperCase versionInfo =
+    abortOption (InfoMsg versionInfo) $ version useUpperCase
 
 -- | Option for suppressing unnecessary output.
 --
