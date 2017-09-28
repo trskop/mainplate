@@ -1,5 +1,8 @@
+{-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE NoImplicitPrelude #-}
 {-# LANGUAGE TypeFamilies #-}
+{-# LANGUAGE TypeSynonymInstances #-}
 -- |
 -- Module:      Options.Applicative.Standard
 -- Description: Standard\/common options and arguments used by command-line
@@ -23,6 +26,11 @@ module Options.Applicative.Standard
 
     -- * Command Output
     , output
+    , outputOption
+
+    -- * Configuration File
+    , config
+    , configOption
 
     -- * Host and Port
     , listenHostAndPort
@@ -82,8 +90,12 @@ import Options.Applicative
     , metavar
     , option
     , short
+--  , str
     )
 import Options.Applicative.Builder.Internal (HasMetavar, HasName)
+
+import Data.ConfigFile (IsConfigFilePath, parseConfigFilePath)
+import Data.Output (IsOutput, parseOutput)
 
 
 -- {{{ Host and Port ----------------------------------------------------------
@@ -228,17 +240,54 @@ versionFlag useUpperCase versionInfo =
 -- | Option for writing output into a file.
 --
 -- @
--- -o FILE
+-- -o FILE, --output FILE
 --     Write output into FILE.
 -- @
 output :: (HasName f, HasMetavar f) => Mod f a
 output = mconcat
     [ short 'o'
+    , long "output"
     , metavar "FILE"
     , help "Write output into FILE."
     ]
 
+-- | Defined as:
+--
+-- @
+-- 'outputOption' = 'option' ('eitherReader' 'parseOutput') 'output'
+-- @
+--
+-- See 'output' for more details.
+outputOption :: IsOutput a => Parser a
+outputOption = option (eitherReader parseOutput) output
+
 -- }}} Command Output ---------------------------------------------------------
+
+-- {{{ Configuration File -----------------------------------------------------
+
+-- | Option for passing configuration file to an application.
+--
+-- @
+-- -c FILE, --config FILE
+--     Read FILE as configuration file.
+-- @
+config :: (HasName f, HasMetavar f) => Mod f a
+config = mconcat
+    [ short 'c'
+    , long "config"
+    , metavar "FILE"
+    , help "Read FILE as configuration file."
+    ]
+
+-- | Defined as:
+--
+-- @
+-- 'configOption' = 'option' ('eitherReader' 'parseConfigFilePath') 'config'
+-- @
+configOption :: IsConfigFilePath a => Parser a
+configOption = option (eitherReader parseConfigFilePath) config
+
+-- }}} Configuration File -----------------------------------------------------
 
 -- {{{ Verbosity --------------------------------------------------------------
 

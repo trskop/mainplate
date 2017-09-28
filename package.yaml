@@ -11,14 +11,20 @@ extra-source-files:
   - ChangeLog.md
   - README.md
 
-ghc-options: -Wall
+ghc-options:
+  - -Wall
+  - -fwarn-implicit-prelude
+  - -fwarn-missing-import-lists
 
 dependencies:
   - base >=4.7 && <5
-  - host-and-port
+
+  - filepath
   - network
   - optparse-applicative
   - verbosity
+
+  - host-and-port
 
 library:
   source-dirs: src
