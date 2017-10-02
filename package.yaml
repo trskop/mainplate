@@ -22,6 +22,7 @@ dependencies:
   - filepath
   - network
   - optparse-applicative
+  - process
   - verbosity
 
   - host-and-port
@@ -32,6 +33,7 @@ library:
     - Data.ConfigFile
     - Data.Output
     - Mainplate.Core
+    - Mainplate.Extensible
     - Options.Applicative.Standard
     - System.FilePath.Parse
 
