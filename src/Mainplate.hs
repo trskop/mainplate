@@ -15,7 +15,11 @@ module Mainplate
     (
     -- * Most Common\/Generic Patterns
       module Mainplate.Core
+
+    -- * Extensible Applications
+    , module Mainplate.Extensible
     )
   where
 
 import Mainplate.Core
+import Mainplate.Extensible

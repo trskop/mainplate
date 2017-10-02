@@ -32,6 +32,7 @@ library:
   exposed-modules:
     - Data.ConfigFile
     - Data.Output
+    - Mainplate
     - Mainplate.Core
     - Mainplate.Extensible
     - Options.Applicative.Standard
