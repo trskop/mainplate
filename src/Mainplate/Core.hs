@@ -2,7 +2,7 @@
 {-# LANGUAGE NoImplicitPrelude #-}
 {-# LANGUAGE RankNTypes #-}
 -- |
--- Module:      Main.Config
+-- Module:      Mainplate.Core
 -- Description: Common patterns used for application @main@.
 -- Copyright:   (c) 2017 Peter Trško
 -- License:     BSD3
@@ -12,7 +12,7 @@
 -- Portability: GHC specific language extensions.
 --
 -- Common patterns used for application @main@.
-module Main.Run
+module Mainplate.Core
     (
     -- * Command Line and Configuration Files
       ReadConfigException(..)

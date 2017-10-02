@@ -29,8 +29,11 @@ dependencies:
 library:
   source-dirs: src
   exposed-modules:
-    - Main.Run
+    - Data.ConfigFile
+    - Data.Output
+    - Mainplate.Core
     - Options.Applicative.Standard
+    - System.FilePath.Parse
 
 # tests:
   # spec:
