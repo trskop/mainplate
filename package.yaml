@@ -35,6 +35,8 @@ dependencies:
   - network
   - optparse-applicative
   - process
+  - semver
+# - text
   - verbosity
   - yaml
 
@@ -46,6 +48,7 @@ library:
   exposed-modules:
     - Data.ConfigFile
     - Data.Output
+    - Data.Version.Class
     - Mainplate
     - Mainplate.Core
     - Mainplate.Extensible
