@@ -17,12 +17,17 @@
 -- Data type representin application (normal) output.
 module Data.Output
     (
-      OutputStdoutOrFile
-    , IsOutput(..)
+    -- * IsOutput
+      IsOutput(..)
+
+    -- * HasOutput
     , HasOutput(..)
     , getOutput
     , setOutput
     , modifyOutput
+
+    -- * Stdout or File
+    , OutputStdoutOrFile
     )
   where
 
@@ -40,11 +45,17 @@ import Text.Show (Show)
 import System.FilePath.Parse (parseFilePath)
 
 
+-- {{{ OutputStdoutOrFile -----------------------------------------------------
+
 -- | Output is either a file or a stdout.
 data OutputStdoutOrFile
     = OutputStdout
     | OutputFile FilePath
   deriving (Eq, Generic, Show)
+
+-- }}} OutputStdoutOrFile -----------------------------------------------------
+
+-- {{{ IsOutput ---------------------------------------------------------------
 
 class IsOutput a where
     parseOutput :: String -> Either String a
@@ -52,6 +63,11 @@ class IsOutput a where
 instance IsOutput FilePath where
     parseOutput = parseFilePath
 
+-- |
+-- @
+-- \"-\" -> 'Right' 'OutputStdout'
+-- str -> 'OutputFile' '<$>' 'parseOutput' str
+-- @
 instance IsOutput OutputStdoutOrFile where
     parseOutput = \case
         "-" -> Right OutputStdout
@@ -59,6 +75,10 @@ instance IsOutput OutputStdoutOrFile where
 
 instance (IsOutput (Output a), HasOutput a) => IsOutput (a -> a) where
     parseOutput = fmap setOutput . parseOutput
+
+-- }}} IsOutput ---------------------------------------------------------------
+
+-- {{{ HasOutput --------------------------------------------------------------
 
 class IsOutput (Output a) => HasOutput a where
     type Output a :: *
@@ -80,3 +100,5 @@ modifyOutput
     -> a
     -> a
 modifyOutput f s = runIdentity (output (Identity . f) s)
+
+-- }}} HasOutput --------------------------------------------------------------

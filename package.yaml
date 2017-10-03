@@ -29,12 +29,16 @@ when:
 dependencies:
   - base >=4.7 && <5
 
+  # Packages from Stackage+Hackage:
+  - aeson
   - filepath
   - network
   - optparse-applicative
   - process
   - verbosity
+  - yaml
 
+  # Other packages:
   - host-and-port
 
 library:
