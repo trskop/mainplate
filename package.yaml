@@ -13,8 +13,18 @@ extra-source-files:
 
 ghc-options:
   - -Wall
-  - -fwarn-implicit-prelude
-  - -fwarn-missing-import-lists
+
+when:
+  - condition: impl(GHC >8)
+    then:
+      ghc-options:
+        - -Wimplicit-prelude
+        - -Wmissing-import-lists
+    else:
+      # At some point these option will become obsolete.
+      ghc-options:
+        - -fwarn-implicit-prelude
+        - -fwarn-missing-import-lists
 
 dependencies:
   - base >=4.7 && <5
