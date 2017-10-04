@@ -130,20 +130,58 @@ class HasRelease a where
 
 -- {{{ Predicates -------------------------------------------------------------
 
-class HasDevelopment a where
+class CanBeDevelopment a where
     -- TODO: Use "Contravariant f".
     isDevelopment :: a -> Bool
 
-instance HasDevelopment Semantic.Version where
+instance CanBeDevelopment Semantic.Version where
     isDevelopment = Semantic.Version.isDevelopment
 
-class HasPublic a where
+class CanBeRelease a where
+    isRelease :: a -> Bool
+
+class CanBeReleaseCandidate a where
+    isReleaseCandidate :: a -> Bool
+
+class CanBePublic a where
     isPublic :: a -> Bool
 
-instance HasPublic Semantic.Version where
+instance CanBePublic Semantic.Version where
     isPublic = Semantic.Version.isPublic
 
-class HasProduction a where
+class CanBeProduction a where
     isProduction :: a -> Bool
+
+-- | Applications, or even operating systems, may provide so called
+-- <https://en.wikipedia.org/wiki/Long-term_support LTS (Long Term Support)>
+-- releases. This class provides 'isLts', which returns
+-- 'Data.Bool.True' for versions of such software.
+--
+-- For example:
+--
+-- * Jenkins LTS releases have version @MAJOR.ITERATION.PATCH@, while normal
+--   releases have just @MAJOR.ITERATION@. For more information see
+--   <https://jenkins.io/download/lts/>.
+-- * Ubuntu LTS releases are released biannually in April and their version
+--   numbers start with @YY.04@ where @YY@ is two-digit year. For more
+--   information see e.g. <https://en.wikipedia.org/wiki/Ubuntu_version_history>
+--   and <https://wiki.ubuntu.com/LTS>.
+class CanBeLts a where
+    -- | Predicate that checks if version of type @a :: *@ is a LTS (Long Term
+    -- Support) version.
+    isLts :: a -> Bool
+
+-- | Applications, or even operating systems, may provide so called _stable_
+-- releases. This class provides 'isStable', which returns 'Data.Bool.True' for
+-- versions of such software.
+--
+-- For example:
+--
+-- * Debian has stable releases, and those have version numbers. Other versions
+--   (testing and unstable) have only code names. For more information see
+--   <https://www.debian.org/releases/>.
+class CanBeStable a where
+    -- | Predicate that checks if version of type @a :: *@ is a stable version.
+    isStable :: a -> Bool
 
 -- }}} Predicates -------------------------------------------------------------
