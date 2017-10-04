@@ -1,4 +1,3 @@
-{-# LANGUAGE DefaultSignatures #-}
 {-# LANGUAGE NoImplicitPrelude #-}
 {-# LANGUAGE TypeFamilies #-}
 -- |
@@ -97,18 +96,24 @@ class HasIteration a where
         => (iteration -> f iteration)
         -> a -> f a
 
-class HasSprint a where
-    type Sprint a :: *
-    sprint
-        :: (Sprint a ~ sprint, Functor f)
-        => (sprint -> f sprint)
-        -> a -> f a
 
-    default sprint
-        :: (HasIteration a, Sprint a ~ sprint, Iteration a ~ sprint, Functor f)
-        => (sprint -> f sprint)
-        -> a -> f a
-    sprint = iteration
+
+-- | Sprint (from Scrum methodology) is an iteration, but iteration is not
+-- necessarily a Sprint.
+--
+-- \"All sprints are iterations but not all iterations are sprints. Iteration
+-- is a common term in iterative and incremental development (IID). Scrum is
+-- one specialized flavor of IID so it makes sense to specialize the
+-- terminology as well.\"
+--
+-- Source: <https://stackoverflow.com/a/1227406>
+class HasIteration a => HasSprint a
+
+sprint
+    :: (HasSprint a, Iteration a ~ sprint, Functor f)
+    => (sprint -> f sprint)
+    -> a -> f a
+sprint = iteration
 
 class HasBuild a where
     type Build a :: *
