@@ -24,6 +24,7 @@ module Mainplate.Core
 
     -- * Utilities
     , applySimpleDefaults
+    , noConfigToRead
     )
   where
 
@@ -33,7 +34,7 @@ import Control.Monad ((>>=))
 import Data.Either (Either(Left, Right), either)
 import Data.Function ((.))
 import Data.Functor (Functor, (<$>))
-import Data.Monoid (Endo(appEndo))
+import Data.Monoid (Endo(appEndo), mempty)
 import Data.String (String)
 import System.IO (IO)
 import Text.Show (Show(showsPrec), showString)
@@ -313,3 +314,6 @@ fromLeftA f = either f pure
 -- See 'runAppWith' for usage examples.
 applySimpleDefaults :: Applicative f => a -> Endo a -> f a
 applySimpleDefaults def = pure . (`appEndo` def)
+
+noConfigToRead :: mode -> Either String (Endo config)
+noConfigToRead _ = Right mempty
