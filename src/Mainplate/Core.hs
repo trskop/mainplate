@@ -160,7 +160,7 @@ instance Exception ReadConfigException
 --     ShowManPage -> 'System.Environment.getProgName' >>= runMan
 --     RunApp NonConfigOptions{config} -> appMain config
 --   where
---     applyDefaults = applySimpleDefaults defaultAppMode
+--     applyDefaults = 'applySimpleDefaults' defaultAppMode
 -- @
 --
 -- @
@@ -284,10 +284,10 @@ instance Exception InitAppRuntimeException
 -- main = 'runAppWith' parseOptions readConfig applyDefaults '$' \\case
 --     ShowManPage -> 'System.Environment.getProgName' >>= runMan
 --     RunApp NonConfigOptions{config} ->
---         withRuntime initRuntime destroyRuntime config '$' \\runtime -> do
+--         'withRuntime' initRuntime destroyRuntime config '$' \\runtime -> do
 --             ...
 --   where
---     applyDefaults = applySimpleDefaults defaultAppMode
+--     applyDefaults = 'applySimpleDefaults' defaultAppMode
 -- @
 withRuntime
     :: forall config runtime
@@ -306,6 +306,7 @@ withRuntime init destroy cfg app = do
   where
     initAppRuntimeException = throwIO . InitAppRuntimeException
 
+-- | Utility function. _DO NOT EXPORT!_
 fromLeftA :: Applicative f => (a -> f b) -> Either a b -> f b
 fromLeftA f = either f pure
 
@@ -315,5 +316,9 @@ fromLeftA f = either f pure
 applySimpleDefaults :: Applicative f => a -> Endo a -> f a
 applySimpleDefaults def = pure . (`appEndo` def)
 
+-- | Helper function for cases when application doesn't read user provided
+-- configuration file.
+--
+-- See 'runAppWith' for more details.
 noConfigToRead :: mode -> Either String (Endo config)
 noConfigToRead _ = Right mempty

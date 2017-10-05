@@ -2,7 +2,8 @@
 {-# LANGUAGE TypeFamilies #-}
 -- |
 -- Module:      Data.ApplicationVersion
--- Description: TODO
+-- Description: Various type classes for use with version numbers represented
+--              as data types.
 -- Copyright:   (c) 2017 Peter Trško
 -- License:     BSD3
 --
@@ -10,7 +11,9 @@
 -- Stability:   experimental
 -- Portability: GHC specific language extensions.
 --
--- TODO
+-- Each package registry \/ application \/ software product has its own special
+-- needs when it comes to versioning. This module is trying to be as agnostic
+-- as possible, so that it can be reused in different contexts.
 module Data.Version.Class
     (
     -- $versions
@@ -447,7 +450,48 @@ toLazyTextWith buffSize = Text.Builder.toLazyTextWith buffSize . toBuilder
 
 -- $versions
 --
--- * TODO: Semantic Versioning.
--- * TODO: Cabal PVP (Package Version Policy).
--- * TODO: Describe OpenSSL versioning to show that not every version component
---   must be a number.
+-- Application version numbers may have a complicated structure. In this
+-- section we will describe some existing versioning schemes so that the
+-- purpose of this module becomes clearer.
+--
+-- One should point out that version numbers aren't actually numbers, but
+-- strings with special format where the most prominent part is usually series
+-- of numbers separated by dots.
+--
+-- == Semantic Versioning
+--
+-- This versioning scheme takes the form of @MAJOR.MINOR.PATCH@, its probably
+-- one of the most widely used versioning schemes out there.
+-- /Semantic Versioning 2.0/ specification is available on
+-- <http://semver.org/ semver.org>.
+--
+-- Haskell package that provides data type compatible with Semantic Versioning
+-- specification is <http://hackage.haskell.org/package/semver semver>. It
+-- provides "Data.SemVer" module with 'Semantic.Version' data type.
+--
+-- == Haskell Package Version Policy (PVP)
+--
+-- Haskell, actually Cabal, packages use @MAJOR1.MAJOR2.MINOR.PATCH@ scheme.
+-- PVP specification is available on <https://pvp.haskell.org/ pvp.haskell.org>.
+--
+-- Data type that represents PVP versions is called 'HaskellPvp.Version' and it
+-- can be found in the <http://hackage.haskell.org/package/base base> package
+-- in its "Data.Version" module.
+--
+-- == Jenkins Versioning Scheme
+--
+-- For normal releases Jenkins uses @MAJOR.ITERATION@ versioning scheme, where
+-- ITERATION is week long.
+--
+-- Jenkins LTS releases have @MAJOR.ITERATION.PATCH@ versioning scheme, For
+-- more information see <https://jenkins.io/download/lts/>.
+--
+-- == OpenSSL Versioning Scheme
+--
+-- TODO: Describe OpenSSL versioning to show that not every version component
+-- must be a number.
+--
+-- == Deb and Rpm Packages
+--
+-- TODO: Describe Deb and Rpm package versioning scheme, which is a great way
+-- to illustrate complexity of versioning.
