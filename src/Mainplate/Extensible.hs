@@ -56,22 +56,33 @@ import Mainplate.Core (runAppWith)
 -- 'External' actions are usually special executables that are used as plugins.
 data Command externalAction internalAction conf
     = Internal internalAction conf
+    -- ^ Represents action that is provided internally by main
+    -- application\/executable.
     | External externalAction conf
+    -- ^ Represents action that is provided by an external application.
   deriving (Eq, Functor, Generic, Generic1, Show)
     -- TODO: Instances for Show1 and Eq1?
 
 -- | Template for application that uses external processes as extensions.
+--
+-- This is just a specialised version of 'runAppWith', and most of its
+-- arguments are preserved. See its documentation for more details.
 runExtensibleAppWith
     :: forall externalAction internalAction config
     .  IO (Endo (Command externalAction internalAction config))
+    -- ^ Parse command line arguments.
     ->  ( forall a. Command externalAction internalAction a
         -> IO (Either String (Endo config))
         )
+    -- ^ Read configuration file.
     ->  ( Endo (Command externalAction internalAction config)
         -> IO (Command externalAction internalAction config)
         )
+    -- ^ Apply defaults.
     -> (externalAction -> config -> IO ())
+    -- ^ Run action provided by an external application.
     -> (internalAction -> config -> IO ())
+    -- ^ Run action that is implemented internally.
     -> IO ()
 runExtensibleAppWith parseOpts appDefaults readConfig runExternal runInternal =
     runAppWith parseOpts appDefaults readConfig $ \case
@@ -128,8 +139,8 @@ externalCommandToCreateProcess ExternalCommand{..} = proc executable options
 --     :: 'ExternalCommand'
 --     -> Config
 --     -> IO ('CreateProcess', 'ExitCode' -> IO ())
--- runExternal = 'runExternalProcess' $ \extCmd cfg ->
---     (,) <$> mkCreateProcess extCmd cfg <*> mkHandleExcitCode extCmd cfg
+-- runExternal = 'runExternalProcess' $ \\extCmd cfg ->
+--     (,) '<$>' mkCreateProcess extCmd cfg '<*>' mkHandleExcitCode extCmd cfg
 --   where
 --     mkCreateProcess extCmd cfg = do
 --         ...
