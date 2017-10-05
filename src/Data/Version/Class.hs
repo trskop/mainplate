@@ -14,10 +14,18 @@
 module Data.Version.Class
     (
     -- $versions
+
+    -- * IsVersion
+      IsVersion(..)
+    , toText
+    , toLazyText
+    , toTextWith
+    , toLazyTextWith
+
     -- * Version Components
 
     -- ** Major Version Number
-      HasMajor(..)
+    , HasMajor(..)
     , getMajor
     , setMajor
     , modifyMajor
@@ -78,14 +86,23 @@ module Data.Version.Class
 
 import Data.Bool (Bool)
 import Data.Coerce (coerce)
+import Data.Eq (Eq)
+import Data.Function ((.))
 import Data.Functor (Functor, (<$>))
 import Data.Functor.Const (Const(Const, getConst))
 import Data.Functor.Identity (Identity(Identity, runIdentity))
 import Data.Int (Int)
-import Data.Version (Version(Version))
+import Data.Monoid (Monoid)
+import Data.Ord (Ord)
+import Data.String (IsString, fromString)
+import qualified Data.Version as HaskellPvp (Version(Version), showVersion)
 --import Data.Word (Word)
 
---import Data.Text (Text)
+import Data.Text (Text)
+import qualified Data.Text.Lazy as Lazy (Text)
+import qualified Data.Text.Lazy as Lazy.Text (toStrict)
+import qualified Data.Text.Lazy.Builder as Text (Builder)
+import qualified Data.Text.Lazy.Builder as Text.Builder (toLazyTextWith)
 import qualified Data.SemVer as Semantic (Version)
 import qualified Data.SemVer as Semantic.Version
     ( isDevelopment
@@ -93,6 +110,8 @@ import qualified Data.SemVer as Semantic.Version
     , major
     , minor
     , patch
+    , toBuilder
+    , toString
     )
 
 
@@ -102,14 +121,14 @@ class HasMajor a where
     type Major a :: *
     major :: (Major a ~ major, Functor f) => (major -> f major) -> a -> f a
 
-instance HasMajor Version where
-    type Major Version = (Int, Int)
-    major f (Version ver tags) = case ver of
+instance HasMajor HaskellPvp.Version where
+    type Major HaskellPvp.Version = (Int, Int)
+    major f (HaskellPvp.Version ver tags) = case ver of
         []           -> set [] <$> f (0,  0)
         [a1]         -> set [] <$> f (a1, 0)
         a1 : a2 : vs -> set vs <$> f (a1, a2)
       where
-        set vs (a1, a2) = Version (a1 : a2 : vs) tags
+        set vs (a1, a2) = HaskellPvp.Version (a1 : a2 : vs) tags
 
 instance HasMajor Semantic.Version where
     type Major Semantic.Version = Int
@@ -132,15 +151,15 @@ class HasMinor a where
     type Minor a :: *
     minor :: (Minor a ~ minor, Functor f) => (minor -> f minor) -> a -> f a
 
-instance HasMinor Version where
-    type Minor Version = Int
-    minor f (Version ver tags) = case ver of
+instance HasMinor HaskellPvp.Version where
+    type Minor HaskellPvp.Version = Int
+    minor f (HaskellPvp.Version ver tags) = case ver of
         []               -> set 0  0  [] <$> f 0
         [a1]             -> set a1 0  [] <$> f 0
         [a1, a2]         -> set a1 a2 [] <$> f 0
         a1 : a2 : i : vs -> set a1 a2 vs <$> f i
       where
-        set a1 a2 vs i = Version (a1 : a2 : i : vs) tags
+        set a1 a2 vs i = HaskellPvp.Version (a1 : a2 : i : vs) tags
 
 instance HasMinor Semantic.Version where
     type Minor Semantic.Version = Int
@@ -163,16 +182,16 @@ class HasPatch a where
     type Patch a :: *
     patch :: (Patch a ~ patch, Functor f) => (patch -> f patch) -> a -> f a
 
-instance HasPatch Version where
-    type Patch Version = Int
-    patch f (Version ver tags) = case ver of
+instance HasPatch HaskellPvp.Version where
+    type Patch HaskellPvp.Version = Int
+    patch f (HaskellPvp.Version ver tags) = case ver of
         []                   -> set 0  0  0 [] <$> f 0
         [a1]                 -> set a1 0  0 [] <$> f 0
         [a1, a2]             -> set a1 a2 0 [] <$> f 0
         [a1, a2, i]          -> set a1 a2 i [] <$> f 0
         a1 : a2 : i : p : vs -> set a1 a2 i vs <$> f p
       where
-        set a1 a2 i vs p = Version (a1 : a2 : i : p : vs) tags
+        set a1 a2 i vs p = HaskellPvp.Version (a1 : a2 : i : p : vs) tags
 
 instance HasPatch Semantic.Version where
     type Patch Semantic.Version = Int
@@ -368,6 +387,63 @@ class CanBeStable a where
     isStable :: a -> Bool
 
 -- }}} Predicates -------------------------------------------------------------
+
+-- {{{ IsVersion --------------------------------------------------------------
+
+-- | Instances for 'Eq' and 'Ord' must respect the semantics of specific
+-- version type.
+class (Eq a, Ord a) => IsVersion a where
+    {-# MINIMAL toSomeString #-}
+
+    -- | Show version as a any string type.
+    toSomeString :: (IsString s, Monoid s) => a -> s
+
+    -- | Convert version into a 'Text.Builder'. Can be used when version is
+    -- inserted into longer text. See also:
+    --
+    -- * 'toText'
+    -- * 'toLazyText'
+    -- * 'toTextWith'
+    -- * 'toLazyTextWith'
+    --
+    -- Default implementation is 'toSomeString'.
+    toBuilder :: a -> Text.Builder
+    toBuilder = toSomeString
+
+    -- TODO:
+    -- fromString :: String -> Either String a
+    -- fromLazyText :: Text -> Either String a
+
+instance IsVersion HaskellPvp.Version where
+    toSomeString = fromString . HaskellPvp.showVersion
+
+instance IsVersion Semantic.Version where
+    toSomeString = fromString . Semantic.Version.toString
+    toBuilder = Semantic.Version.toBuilder
+
+-- | Show version as (strict) 'Text'.
+--
+-- This function uses 'toLazyText', notes mentioned in its documentation apply.
+toText :: IsVersion a => a -> Text
+toText = Lazy.Text.toStrict . toLazyText
+
+-- | Show version as (lazy) 'Lazy.Text'.
+--
+-- Be aware that this implementation uses 'toLazyTextWith' with a small buffer
+-- size optimised for common version formats. Use 'toLazyTextWith' to use
+-- different buffer size.
+toLazyText :: IsVersion a => a -> Lazy.Text
+toLazyText = toLazyTextWith 24 -- Value taken from semver package.
+
+-- | Show version as (strict) 'Text'.
+toTextWith :: IsVersion a => a -> Text
+toTextWith = Lazy.Text.toStrict . toLazyText
+
+-- | Show version as (lazy) 'Lazy.Text'.
+toLazyTextWith :: IsVersion a => Int -> a -> Lazy.Text
+toLazyTextWith buffSize = Text.Builder.toLazyTextWith buffSize . toBuilder
+
+-- }}} IsVersion --------------------------------------------------------------
 
 -- $versions
 --

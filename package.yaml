@@ -36,7 +36,7 @@ dependencies:
   - optparse-applicative
   - process
   - semver
-# - text
+  - text
   - verbosity
   - yaml
 
