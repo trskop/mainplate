@@ -128,7 +128,7 @@ import qualified Data.SemVer as Semantic.Version
 
 -- {{{ HasMajor ---------------------------------------------------------------
 
-class HasMajor a where
+class IsVersion a => HasMajor a where
     type Major a :: *
     major :: (Major a ~ major, Functor f) => (major -> f major) -> a -> f a
 
@@ -158,7 +158,7 @@ modifyMajor f s = runIdentity (major (coerce f) s)
 
 -- {{{ HasMinor ---------------------------------------------------------------
 
-class HasMinor a where
+class IsVersion a => HasMinor a where
     type Minor a :: *
     minor :: (Minor a ~ minor, Functor f) => (minor -> f minor) -> a -> f a
 
@@ -189,7 +189,7 @@ modifyMinor f s = runIdentity (minor (coerce f) s)
 
 -- {{{ HasPatch ---------------------------------------------------------------
 
-class HasPatch a where
+class IsVersion a => HasPatch a where
     type Patch a :: *
     patch :: (Patch a ~ patch, Functor f) => (patch -> f patch) -> a -> f a
 
@@ -221,7 +221,7 @@ modifyPatch f s = runIdentity (patch (coerce f) s)
 
 -- {{{ HasIteration -----------------------------------------------------------
 
-class HasIteration a where
+class IsVersion a => HasIteration a where
     type Iteration a :: *
     iteration
         :: (Iteration a ~ iteration, Functor f)
@@ -280,7 +280,7 @@ modifySprint = modifyIteration
 
 -- {{{ HasBuild ---------------------------------------------------------------
 
-class HasBuild a where
+class IsVersion a => HasBuild a where
     type Build a :: *
     build :: (Build a ~ build, Functor f) => (build -> f build) -> a -> f a
 
@@ -297,7 +297,7 @@ modifyBuild f s = runIdentity (build (coerce f) s)
 
 -- {{{ HasGitCommit -----------------------------------------------------------
 
-class HasGitCommit a where
+class IsVersion a => HasGitCommit a where
     type GitCommit a :: *
     gitCommit
         :: (GitCommit a ~ commit, Functor f)
@@ -320,7 +320,7 @@ modifyGitCommit f s = runIdentity (gitCommit (coerce f) s)
 
 -- {{{ HasRelease -------------------------------------------------------------
 
-class HasRelease a where
+class IsVersion a => HasRelease a where
     type Release a :: *
     release
         :: (Release a ~ release, Functor f)
@@ -343,26 +343,26 @@ modifyRelease f s = runIdentity (release (coerce f) s)
 
 -- {{{ Predicates -------------------------------------------------------------
 
-class CanBeDevelopment a where
+class IsVersion a => CanBeDevelopment a where
     -- TODO: Use "Contravariant f".
     isDevelopment :: a -> Bool
 
 instance CanBeDevelopment Semantic.Version where
     isDevelopment = Semantic.Version.isDevelopment
 
-class CanBeRelease a where
+class IsVersion a => CanBeRelease a where
     isRelease :: a -> Bool
 
-class CanBeReleaseCandidate a where
+class IsVersion a => CanBeReleaseCandidate a where
     isReleaseCandidate :: a -> Bool
 
-class CanBePublic a where
+class IsVersion a => CanBePublic a where
     isPublic :: a -> Bool
 
 instance CanBePublic Semantic.Version where
     isPublic = Semantic.Version.isPublic
 
-class CanBeProduction a where
+class IsVersion a => CanBeProduction a where
     isProduction :: a -> Bool
 
 -- | Applications, or even operating systems, may provide so called
@@ -379,7 +379,7 @@ class CanBeProduction a where
 --   numbers start with @YY.04@ where @YY@ is two-digit year. For more
 --   information see e.g. <https://en.wikipedia.org/wiki/Ubuntu_version_history>
 --   and <https://wiki.ubuntu.com/LTS>.
-class CanBeLts a where
+class IsVersion a => CanBeLts a where
     -- | Predicate that checks if version of type @a :: *@ is a LTS (Long Term
     -- Support) version.
     isLts :: a -> Bool
@@ -393,7 +393,7 @@ class CanBeLts a where
 -- * Debian has stable releases, and those have version numbers. Other versions
 --   (testing and unstable) have only code names. For more information see
 --   <https://www.debian.org/releases/>.
-class CanBeStable a where
+class IsVersion a => CanBeStable a where
     -- | Predicate that checks if version of type @a :: *@ is a stable version.
     isStable :: a -> Bool
 
