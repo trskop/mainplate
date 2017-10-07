@@ -125,7 +125,7 @@ import qualified Data.Version as HaskellPvp
 
 import Data.Text (Text)
 import qualified Data.Text.Lazy as Lazy (Text)
-import qualified Data.Text.Lazy as Lazy.Text (toStrict)
+import qualified Data.Text.Lazy as Lazy.Text (toStrict, unpack)
 import qualified Data.Text.Lazy.Builder as Text (Builder)
 import qualified Data.Text.Lazy.Builder as Text.Builder (toLazyTextWith)
 import qualified Data.SemVer as Semantic (Version, major, minor, patch)
@@ -418,10 +418,13 @@ class IsVersion a => CanBeStable a where
 -- | Instances for 'Eq' and 'Ord' must respect the semantics of specific
 -- version type.
 class (Eq a, Ord a) => IsVersion a where
-    {-# MINIMAL toSomeString #-}
+    {-# MINIMAL toSomeString | toBuilder #-}
 
     -- | Show version as a any string type.
+    --
+    -- Default implementation is in terms of 'toBuilder' (via 'toLazyText').
     toSomeString :: (IsString s, Monoid s) => a -> s
+    toSomeString = fromString . Lazy.Text.unpack . toLazyText
 
     -- | Convert version into a 'Text.Builder'. Can be used when version is
     -- inserted into longer text. See also:
