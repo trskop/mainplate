@@ -92,17 +92,24 @@ module Data.Version.Class
     , CanBeReleaseCandidate(..)
     , CanBeStable(..)
     , CanBeLts(..)
+
+    -- * Utilities
+    , safeIncrement
+    , increment
     )
   where
 
+import Prelude (Bounded, Enum, maxBound, succ)
+
 import Data.Bool (Bool)
 import Data.Coerce (coerce)
-import Data.Eq (Eq)
-import Data.Function ((.))
+import Data.Eq (Eq((==)))
+import Data.Function (($), (.), id)
 import Data.Functor (Functor, (<$>))
 import Data.Functor.Const (Const(Const, getConst))
 import Data.Functor.Identity (Identity(Identity, runIdentity))
 import Data.Int (Int)
+import Data.Maybe (Maybe(Nothing, Just))
 import Data.Monoid (Monoid)
 import Data.Ord (Ord)
 import Data.String (IsString, fromString)
@@ -423,7 +430,8 @@ class (Eq a, Ord a) => IsVersion a where
 
     -- TODO:
     -- fromString :: String -> Either String a
-    -- fromLazyText :: Text -> Either String a
+    -- fromText :: Text -> Either String a
+    -- fromLazyText :: Lazy.Text -> Either String a
 
 instance IsVersion HaskellPvp.Version where
     toSomeString = fromString . HaskellPvp.showVersion
@@ -490,6 +498,45 @@ modifyVersion
 modifyVersion f s = runIdentity (version (coerce f) s)
 
 -- }}} HasVersion -------------------------------------------------------------
+
+-- {{{ Utilities --------------------------------------------------------------
+
+-- | Increment enumerable version field until 'maxBound', in which case it
+-- returns 'Nothing'. See also 'increment'.
+--
+-- Usage example:
+--
+-- >>> safeIncrement (major . _1) $ Data.Version.makeVersion [0,1,2,3]
+-- Just (Version {versionBranch = [1,1,2,3], versionTags = []})
+-- >>> safeIncrement minor $ Data.Version.makeVersion [0,1,2,3]
+-- Just (Version {versionBranch = [0,1,3,3], versionTags = []})
+safeIncrement
+    :: (Bounded field, Enum field, Eq field)
+    => ((field -> Maybe field) -> a -> Maybe a)
+    -- ^ A <http://hackage.haskell.org/package/lens lens>-like function
+    -- (@LensLike Maybe a a field field@).
+    -> a -> Maybe a
+safeIncrement l = l $ \v -> if v == maxBound then Nothing else Just (succ v)
+
+-- | Increment enumerable version field until 'maxBound' is reached. See also
+-- 'safeIncrement'.
+--
+-- Usage example:
+--
+-- >>> increment (major . _1) $ Data.Version.makeVersion [0,1,2,3]
+-- Version {versionBranch = [1,1,2,3], versionTags = []}
+-- >>> increment minor $ Data.Version.makeVersion [0,1,2,3]
+-- Version {versionBranch = [0,1,3,3], versionTags = []}
+increment
+    :: (Bounded field, Enum field, Eq field)
+    => ((field -> Identity field) -> a -> Identity a)
+    -- ^ A setter in <http://hackage.haskell.org/package/lens lens> terms.
+    -> a -> a
+increment l s = runIdentity (l (Identity . somewhatSafeSucc) s)
+  where
+    somewhatSafeSucc v = if v == maxBound then v else succ v
+
+-- }}} Utilities --------------------------------------------------------------
 
 -- $versions
 --

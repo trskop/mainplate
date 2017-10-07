@@ -21,8 +21,6 @@
 module Main (main)
   where
 
-import Prelude ((+))
-
 import Control.Applicative ((<*>))
 import Control.Arrow (left)
 import Control.Exception (displayException)
@@ -62,7 +60,7 @@ import Data.Version.Class
     )
 import qualified Data.Version.Class as Version
     ( HasIteration(Iteration, iteration)
-    , modifyIteration
+    , increment
     , toText
     )
 
@@ -176,7 +174,7 @@ main :: IO ()
 main = runAppWith parseOptions readConfig applyDefaults $ \case
     ModifyVersion file cfg ->
         maybe ByteString.putStr ByteString.writeFile (getConfigFile file)
-        . renderConfig $ Version.modifyIteration (+1) cfg
+        . renderConfig $ Version.increment Version.iteration cfg
   where
     parseOptions =
         maybe mempty (Endo . setConfigFilePath . configFile) . listToMaybe
