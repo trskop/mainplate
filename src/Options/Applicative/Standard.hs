@@ -24,9 +24,10 @@ module Options.Applicative.Standard
       version
     , versionFlag
 
-    -- * Command Output
+    -- * Command Input\/Output
     , output
     , outputOption
+    , file
 
     -- * Configuration File
     , config
@@ -48,6 +49,9 @@ module Options.Applicative.Standard
     , parseVerbosity
     , verbosityOption
     , incrementVerbosityFlag
+
+    -- * Other
+    , message
     )
   where
 
@@ -264,6 +268,18 @@ output = mconcat
 outputOption :: IsOutput a => Parser a
 outputOption = option (eitherReader parseOutput) output
 
+-- | Option for reading input from a file.
+--
+-- > -f FILE, --file FILE
+-- >     Read input from FILE.
+file :: (HasName f, HasMetavar f) => Mod f a
+file = mconcat
+    [ short 'f'
+    , long "file"
+    , metavar "FILE"
+    , help "Read input from FILE."
+    ]
+
 -- }}} Command Output ---------------------------------------------------------
 
 -- {{{ Configuration File -----------------------------------------------------
@@ -403,3 +419,20 @@ incrementVerbosityFlag =
         ]
 
 -- }}} Verbosity --------------------------------------------------------------
+
+-- {{{ Other ------------------------------------------------------------------
+
+-- | Flag for passing text of some kind of a message to the application. For
+-- example <https://git-scm.com/ Git> uses this option to pass commit message.
+--
+-- > -m TEXT, --message TEXT
+-- >     Use TEXT as a message.
+message :: (HasName f, HasMetavar f) => Mod f a
+message = mconcat
+    [ short 'm'
+    , long "message"
+    , metavar "TEXT"
+    , help "Use TEXT as a message."
+    ]
+
+-- }}} Other ------------------------------------------------------------------
