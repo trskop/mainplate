@@ -95,6 +95,8 @@ import Options.Applicative
 import Options.Applicative.Builder.Internal (HasMetavar, HasName)
 
 import Data.ConfigFile (IsConfigFilePath, parseConfigFilePath)
+import Data.Version.Class (IsVersion)
+import qualified Data.Version.Class as Version (toSomeString)
 import Data.Output (IsOutput, parseOutput)
 
 
@@ -222,16 +224,17 @@ version useUpperCase = mconcat
 --
 -- See 'version' for more information.
 versionFlag
-    :: Bool
+    :: IsVersion v
+    => Bool
     -- ^ Use uppercase 'V'? In other words if 'True' then the short option is
     -- @-V@, and if 'False' then it's @-v@. This is so that version option can
     -- be combined with e.g. verbosity option for which @-v@ is also commonly
     -- used.
-    -> String
+    -> v
     -- ^ Version information to be printed.
     -> Parser (a -> a)
-versionFlag useUpperCase versionInfo =
-    abortOption (InfoMsg versionInfo) $ version useUpperCase
+versionFlag useUpperCase v =
+    abortOption (InfoMsg $ Version.toSomeString v) $ version useUpperCase
 
 -- }}} Version ----------------------------------------------------------------
 
