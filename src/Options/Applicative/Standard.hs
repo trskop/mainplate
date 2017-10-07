@@ -194,10 +194,8 @@ connectHostAndPort convertHost convertPort = eitherReader
 -- @-V|--version@ or @-v|--version@ depending on the value of the first
 -- argument.
 --
--- @
--- -V (or -v), --version
---   Print version information and exit.
--- @
+-- > -V (or -v), --version
+-- >     Print version information and exit.
 --
 -- Usage example:
 --
@@ -222,8 +220,8 @@ version useUpperCase = mconcat
 -- | Defined as:
 --
 -- @
--- 'versionFlag' useUpperCase versionInfo =
---     'abortOption' ('InfoMsg' 'versionInfo') '$' 'version' useUpperCase
+-- 'versionFlag' useUpperCase v =
+--     'abortOption' ('InfoMsg' '$' 'Version.toSomeString' v) '$' 'version' useUpperCase
 -- @
 --
 -- See 'version' for more information.
@@ -246,10 +244,8 @@ versionFlag useUpperCase v =
 
 -- | Option for writing output into a file.
 --
--- @
--- -o FILE, --output FILE
---     Write output into FILE.
--- @
+-- > -o FILE, --output FILE
+-- >     Write output into FILE.
 output :: (HasName f, HasMetavar f) => Mod f a
 output = mconcat
     [ short 'o'
@@ -286,10 +282,8 @@ file = mconcat
 
 -- | Option for passing configuration file to an application.
 --
--- @
--- -c FILE, --config FILE
---     Read FILE as configuration file.
--- @
+-- > -c FILE, --config FILE
+-- >     Read FILE as configuration file.
 config :: (HasName f, HasMetavar f) => Mod f a
 config = mconcat
     [ short 'c'
@@ -312,10 +306,8 @@ configOption = option (eitherReader parseConfigFilePath) config
 
 -- | Option for suppressing unnecessary output.
 --
--- @
--- -q, --quiet
---     Quiet mode. Suppress normal diagnostic or result output.
--- @
+-- > -q, --quiet
+-- >     Quiet mode. Suppress normal diagnostic or result output.
 quiet :: HasName f => Mod f a
 quiet = mconcat
     [ long "quiet"
@@ -325,10 +317,8 @@ quiet = mconcat
 
 -- | Option for suppressing unnecessary output.
 --
--- @
--- -s, --silent
---     Silent mode. Suppress normal diagnostic or result output.
--- @
+-- > -s, --silent
+-- >     Silent mode. Suppress normal diagnostic or result output.
 silent :: HasName f => Mod f a
 silent = mconcat
     [ long "silent"
@@ -348,10 +338,8 @@ silentFlag = flag id (setVerbosity Silent) silent
 
 -- | Option for printing additional diagnostic output.
 --
--- @
--- -v, --verbose
---     Verbose mode. Prints additional diagnostic output.
--- @
+-- > -v, --verbose
+-- >     Verbose mode. Prints additional diagnostic output.
 verbose :: HasName f => Mod f a
 verbose = mconcat
     [ short 'v'
@@ -371,10 +359,8 @@ verboseFlag = flag id (setVerbosity Verbose) verbose
 
 -- | Option for setting verbosity to a specified value.
 --
--- @
--- --verbosity=VERBOSITY
---     Set verbosity level to VERBOSITY.
--- @
+-- > --verbosity=VERBOSITY
+-- >     Set verbosity level to VERBOSITY.
 verbosity :: (HasName f, HasMetavar f) => Mod f a
 verbosity = mconcat
     [ long "verbosity"
@@ -405,10 +391,8 @@ verbosityOption = option parseVerbosity verbosity
 -- | Flag for incrementing verbosity by one level. It can be used multiple
 -- times to increase it more.
 --
--- @
--- -v
---     Increment verbosity by one level. Can be used multiple times.
--- @
+-- > -v
+-- >     Increment verbosity by one level. Can be used multiple times.
 --
 -- See 'Verbosity.increment'' for more details.
 incrementVerbosityFlag :: HasVerbosity a => Parser (a -> a)

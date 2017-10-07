@@ -2,7 +2,7 @@
 {-# LANGUAGE NoImplicitPrelude #-}
 -- |
 -- Module:      System.FilePath.Parse
--- Description: TODO: Module synopsis
+-- Description: Parse FilePath from a String.
 -- Copyright:   (c) 2017 Peter Trško
 -- License:     BSD3
 --
@@ -10,7 +10,7 @@
 -- Stability:   experimental
 -- Portability: GHC specific language extensions.
 --
--- TODO: Module description.
+-- Parse 'FilePath' from a 'String'.
 module System.FilePath.Parse
     ( parseFilePath
     )

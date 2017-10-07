@@ -1,7 +1,7 @@
 name: mainplate
 version: 0.0.1.0
-synopsis: TODO
-description: TODO
+synopsis: Common patterns used for application main.
+description: Common patterns used for application @main@.
 maintainer: Peter Trško <peter.trsko@gmail.com>
 license: BSD3
 github: trskop/mainplate
