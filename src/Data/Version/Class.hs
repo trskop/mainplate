@@ -1,3 +1,4 @@
+{-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE NoImplicitPrelude #-}
 {-# LANGUAGE TypeFamilies #-}
 -- |
@@ -24,6 +25,13 @@ module Data.Version.Class
     , toLazyText
     , toTextWith
     , toLazyTextWith
+
+    -- * HasVersion
+
+    , HasVersion(..)
+    , getVersion
+    , setVersion
+    , modifyVersion
 
     -- * Version Components
 
@@ -447,6 +455,41 @@ toLazyTextWith :: IsVersion a => Int -> a -> Lazy.Text
 toLazyTextWith buffSize = Text.Builder.toLazyTextWith buffSize . toBuilder
 
 -- }}} IsVersion --------------------------------------------------------------
+
+-- {{{ HasVersion -------------------------------------------------------------
+
+class IsVersion (Version a) => HasVersion a where
+    type Version a :: *
+
+    -- | Lens for accessing @version :: *@ value stored in type @a :: *@.
+    version
+        :: (Version a ~ version, Functor f)
+        => (version -> f version)
+        -> a -> f a
+
+-- | @'version' = 'id'@
+instance HasVersion HaskellPvp.Version where
+    type Version HaskellPvp.Version = HaskellPvp.Version
+    version = id
+
+-- | @'version' = 'id'@
+instance HasVersion Semantic.Version where
+    type Version Semantic.Version = Semantic.Version
+    version = id
+
+getVersion :: (Version a ~ version, HasVersion a) => a -> version
+getVersion s = getConst (version coerce s)
+
+setVersion :: (Version a ~ version, HasVersion a) => version -> a -> a
+setVersion a s = runIdentity (version (\_ -> coerce a) s)
+
+modifyVersion
+    :: (Version a ~ version, HasVersion a)
+    => (version -> version)
+    -> a -> a
+modifyVersion f s = runIdentity (version (coerce f) s)
+
+-- }}} HasVersion -------------------------------------------------------------
 
 -- $versions
 --
