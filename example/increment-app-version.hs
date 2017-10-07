@@ -21,6 +21,8 @@
 module Main (main)
   where
 
+import Prelude (fromIntegral)
+
 import Control.Applicative ((<*>))
 import Control.Arrow (left)
 import Control.Exception (displayException)
@@ -32,6 +34,7 @@ import Data.Monoid (Endo(Endo), (<>), mconcat, mempty)
 import Data.Maybe (Maybe(Just, Nothing), fromMaybe, listToMaybe, maybe)
 import Data.Ord (Ord(compare), Ordering(EQ))
 import Data.String (String, fromString)
+import Data.Version (makeVersion)
 import Data.Word (Word)
 import System.Environment (getArgs)
 import System.IO (IO)
@@ -60,6 +63,7 @@ import Data.Version.Class
     )
 import qualified Data.Version.Class as Version
     ( HasIteration(Iteration, iteration)
+    , ToPvpVersion(toPvpVersion)
     , increment
     , toText
     )
@@ -138,6 +142,10 @@ instance IsVersion AppVersion where
 
     -- TODO: toBuilder
 
+instance Version.ToPvpVersion AppVersion where
+    toPvpVersion AppVersion{major, minor, iteration, build} =
+        makeVersion $ fromIntegral <$> [major, minor, iteration, build]
+
 instance Version.HasIteration AppVersion where
     type Iteration AppVersion = Word
     iteration f s@AppVersion{iteration} =
@@ -168,7 +176,7 @@ renderConfig v = mconcat
     , "  version: ", version, "\n"
     ]
   where
-    version = Text.encodeUtf8 $ Version.toText v{gitCommit="", customer=""}
+    version = Text.encodeUtf8 . Version.toText $ Version.toPvpVersion v
 
 main :: IO ()
 main = runAppWith parseOptions readConfig applyDefaults $ \case

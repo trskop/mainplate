@@ -93,6 +93,9 @@ module Data.Version.Class
     , CanBeStable(..)
     , CanBeLts(..)
 
+    -- * Conversion
+    , ToPvpVersion(..)
+
     -- * Utilities
     , safeIncrement
     , increment
@@ -113,7 +116,11 @@ import Data.Maybe (Maybe(Nothing, Just))
 import Data.Monoid (Monoid)
 import Data.Ord (Ord)
 import Data.String (IsString, fromString)
-import qualified Data.Version as HaskellPvp (Version(Version), showVersion)
+import qualified Data.Version as HaskellPvp
+    ( Version(Version)
+    , makeVersion
+    , showVersion
+    )
 --import Data.Word (Word)
 
 import Data.Text (Text)
@@ -121,7 +128,7 @@ import qualified Data.Text.Lazy as Lazy (Text)
 import qualified Data.Text.Lazy as Lazy.Text (toStrict)
 import qualified Data.Text.Lazy.Builder as Text (Builder)
 import qualified Data.Text.Lazy.Builder as Text.Builder (toLazyTextWith)
-import qualified Data.SemVer as Semantic (Version)
+import qualified Data.SemVer as Semantic (Version, major, minor, patch)
 import qualified Data.SemVer as Semantic.Version
     ( isDevelopment
     , isPublic
@@ -498,6 +505,34 @@ modifyVersion
 modifyVersion f s = runIdentity (version (coerce f) s)
 
 -- }}} HasVersion -------------------------------------------------------------
+
+-- {{{ ToPvpVersion------------------------------------------------------------
+
+-- | Application version may imply Haskell\/Cabal package version. This is
+-- useful for example in situations where package Cabal\/hpack config is
+-- generated.
+class IsVersion a => ToPvpVersion a where
+    -- | Convert version value of type @a :: *@ into 'HaskellPvp.Version'
+    -- (standard Haskell\/Cabal version that follows
+    -- <https://pvp.haskell.org/ PVP specification>).
+    toPvpVersion :: a -> HaskellPvp.Version
+
+-- | @'toPvpVersion' = 'id'@
+instance ToPvpVersion HaskellPvp.Version where
+    toPvpVersion = id
+
+-- |
+-- > MAJOR.MINOR.PATCH[-IDENTIFIER[...]] --> 0.MAJOR.MINOR.PATCH
+instance ToPvpVersion Semantic.Version where
+    toPvpVersion v = HaskellPvp.makeVersion
+        [ get Semantic.major
+        , get Semantic.minor
+        , get Semantic.patch
+        ]
+      where
+        get l = getConst (l Const v)
+
+-- }}} ToPvpVersion -----------------------------------------------------------
 
 -- {{{ Utilities --------------------------------------------------------------
 
