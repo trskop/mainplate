@@ -43,6 +43,7 @@ packages:
 extra-deps:
   - git: https://github.com/trskop/host-and-port
     commit: 6ab40e96695b3f86b64b50445d4c943711128056
+  - hlint-test-0.1.0.0
 
 # Override default flag values for local packages and extra-deps
 flags: {}

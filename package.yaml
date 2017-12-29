@@ -55,7 +55,14 @@ library:
     - Options.Applicative.Standard
     - System.FilePath.Parse
 
-# tests:
+tests:
+  hlint-test-exe:
+    main: hlint-test-exe.hs
+    source-dirs:
+      - test
+    dependencies:
+        hlint-test
+
   # spec:
     # cpp-options: -DTEST
     # main: Spec.hs
