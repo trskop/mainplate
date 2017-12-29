@@ -37,11 +37,12 @@ resolver: lts-10.1
 # will not be run. This is useful for tweaking upstream packages.
 packages:
   - .
-  - ../host-and-port
 
 # Dependency packages to be pulled from upstream that are not in the resolver
 # (e.g., acme-missiles-0.3)
-extra-deps: []
+extra-deps:
+  - git: https://github.com/trskop/host-and-port
+    commit: 6ab40e96695b3f86b64b50445d4c943711128056
 
 # Override default flag values for local packages and extra-deps
 flags: {}
