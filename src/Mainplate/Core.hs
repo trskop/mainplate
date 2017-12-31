@@ -193,7 +193,10 @@ runAppWith
     -- then that exception is also wrapped in 'ReadConfigException'. Purpose of
     -- this is to add more meaning to the error\/exception.
     -> (Endo (mode config) -> IO (mode config))
-    -- ^ Apply defaults, in the simplest cases this is just 'appEndoA'
+    -- ^ Apply defaults, in the simplest cases this is just
+    -- 'applySimpleDefaults'. Reason for allowing 'IO' side effects is that
+    -- default configuration may be taken from e.g. global configuration file,
+    -- or from scanning environment.
     -> (mode config -> IO ())
     -- ^ Application main that takes mode and configuration.
     -> IO ()
