@@ -52,6 +52,8 @@ module Options.Applicative.Standard
     , incrementVerbosityFlag
 
     -- * Other
+    , batch
+    , define
     , message
     )
   where
@@ -419,8 +421,37 @@ incrementVerbosityFlag =
 
 -- {{{ Other ------------------------------------------------------------------
 
--- | Flag for passing text of some kind of a message to the application. For
--- example <https://git-scm.com/ Git> uses this option to pass commit message.
+-- | Flag for switching to batch mode, a non interactive mode which can be used
+-- when calling application from a script.
+--
+-- > -b, --batch
+-- >     Batch mode, suppress interaction and unnecessary input/output.
+batch :: HasName f => Mod f a
+batch = mconcat
+    [ short 'b'
+    , long "batch"
+    , help "Batch mode, suppress interaction and unnecessary input/output."
+    ]
+
+-- | Option to pass user-defined variable definitions to an application. For
+-- example used by:
+--
+-- * <https://gcc.gnu.org/onlinedocs/gcc-2.95.2/gcc_2.html#SEC11 GCC pre-processor options>
+-- * <https://downloads.haskell.org/~ghc/latest/docs/html/users_guide/flags.html#c-pre-processor-options GHC C pre-processor options>
+--
+-- > -D NAME[=VALUE], --define NAME[=VALUE]
+-- >     Define a variable NAME, optionally with a specified VALUE.
+define :: (HasName f, HasMetavar f) => Mod f a
+define = mconcat
+    [ short 'D'
+    , long "define"
+    , metavar "NAME[=VALUE]"
+    , help "Define a variable NAME, optionally with a specified VALUE."
+    ]
+
+-- | Option for passing text of some kind of a message to the application. For
+-- example <https://git-scm.com/docs/git-commit#git-commit--mltmsggt git-commit>
+-- uses this option to pass commit message.
 --
 -- > -m TEXT, --message TEXT
 -- >     Use TEXT as a message.
