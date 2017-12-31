@@ -41,6 +41,7 @@ module Options.Applicative.Standard
 
     -- * Verbosity
     , quiet
+    , quietFlag
     , silent
     , silentFlag
     , verbose
@@ -315,10 +316,22 @@ quiet = mconcat
     , help "Quiet mode. Suppress normal diagnostic or result output."
     ]
 
+-- | Defined as:
+--
+-- @
+-- 'quietFlag' = 'flag' 'id' ('setVerbosity' 'Silent') 'quiet'
+-- @
+--
+-- See also 'quiet', 'silent', 'silentFlag', and 'Verbosity'.
+quietFlag :: HasVerbosity a => Parser (a -> a)
+quietFlag = flag id (setVerbosity Silent) quiet
+
 -- | Option for suppressing unnecessary output.
 --
 -- > -s, --silent
 -- >     Silent mode. Suppress normal diagnostic or result output.
+--
+-- See also 'silentFlag', 'quiet', 'quietFlag', and 'Verbosity'.
 silent :: HasName f => Mod f a
 silent = mconcat
     [ long "silent"
@@ -332,7 +345,7 @@ silent = mconcat
 -- 'silentFlag' = 'flag' 'id' ('setVerbosity' 'Silent') 'silent'
 -- @
 --
--- See 'silent' and 'Verbosity' for more details.
+-- See also 'silent', 'quiet', 'quietFlag', and 'Verbosity'.
 silentFlag :: HasVerbosity a => Parser (a -> a)
 silentFlag = flag id (setVerbosity Silent) silent
 
