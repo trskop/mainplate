@@ -7,7 +7,7 @@
 -- Module:      Options.Applicative.Standard
 -- Description: Standard\/common options and arguments used by command-line
 --              applications.
--- Copyright:   (c) 2017 Peter Trško
+-- Copyright:   (c) 2017-2018 Peter Trško
 -- License:     BSD3
 --
 -- Maintainer:  peter.trsko@gmail.com
@@ -23,6 +23,7 @@ module Options.Applicative.Standard
     -- * Version Information
       version
     , versionFlag
+    , numericVersion
 
     -- * Command Input\/Output
     , output
@@ -91,6 +92,7 @@ import Options.Applicative
     , abortOption
     , eitherReader
     , flag
+    , flag'
     , help
     , hidden
     , long
@@ -240,6 +242,18 @@ versionFlag
     -> Parser (a -> a)
 versionFlag useUpperCase v =
     abortOption (InfoMsg $ Version.toSomeString v) $ version useUpperCase
+
+-- | Option for printing \"numeric\" version information, i.e. version
+-- information that is easy to parse by a machine.
+--
+-- > --numeric-version
+-- >     Print "numeric" version information and exit.
+numericVersion :: HasName f => Mod f a
+numericVersion = mconcat
+    [ long "numeric-version"
+    , help "Print \"numeric\" version information and exit."
+    , hidden
+    ]
 
 -- }}} Version ----------------------------------------------------------------
 
@@ -410,9 +424,14 @@ verbosityOption = option parseVerbosity verbosity
 -- >     Increment verbosity by one level. Can be used multiple times.
 --
 -- See 'Verbosity.increment'' for more details.
+--
+-- Note that this definition uses 'flag'' under the hood to allow using
+-- 'Control.Applicative.some' and 'Control.Applicative.many' combinators.  In
+-- other words, it will fail when used without these combinators or
+-- 'Control.Applicative.optional'.
 incrementVerbosityFlag :: HasVerbosity a => Parser (a -> a)
 incrementVerbosityFlag =
-    flag id (modifyVerbosity Verbosity.increment') $ mconcat
+    flag' (modifyVerbosity Verbosity.increment') $ mconcat
         [ short 'v'
         , help "Increment verbosity by one level. Can be used multiple times."
         ]
