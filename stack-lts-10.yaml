@@ -7,7 +7,7 @@ packages:
   - .
   - location:
       git: https://github.com/trskop/host-and-port
-      commit: 9ae3210a901bebf62858d7e23f57f39d8bab2a12
+      commit: f4639d63f5c2e4c4faef94f5214111625af2a85d
     extra-dep: true
 
 extra-deps: []
