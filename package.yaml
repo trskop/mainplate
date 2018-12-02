@@ -32,30 +32,24 @@ dependencies:
 
   # Packages from Stackage+Hackage:
   - aeson
+  - dhall
   - filepath
+  - mtl
   - network
   - optparse-applicative
   - process
   - semver
+  - terminfo
   - text
+  - unordered-containers
   - verbosity
   - yaml
-  - terminfo
 
   # Other packages:
   - host-and-port
 
 library:
   source-dirs: src
-  exposed-modules:
-    - Data.ConfigFile
-    - Data.Output
-    - Data.Version.Class
-    - Mainplate
-    - Mainplate.Core
-    - Mainplate.Extensible
-    - Options.Applicative.Standard
-    - System.FilePath.Parse
 
 # tests:
   # spec:
