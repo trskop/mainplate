@@ -264,8 +264,8 @@ modifyIteration f s = runIdentity (iteration (coerce f) s)
 -- | Sprint (from Scrum methodology) is an iteration, but iteration is not
 -- necessarily a Sprint.
 --
--- \"All sprints are iterations but not all iterations are sprints. Iteration
--- is a common term in iterative and incremental development (IID). Scrum is
+-- \"All sprints are iterations but not all iterations are sprints.  Iteration
+-- is a common term in iterative and incremental development (IID).  Scrum is
 -- one specialized flavor of IID so it makes sense to specialize the
 -- terminology as well.\"
 --
@@ -548,6 +548,8 @@ instance ToPvpVersion Semantic.Version where
 -- Just (Version {versionBranch = [1,1,2,3], versionTags = []})
 -- >>> safeIncrement minor $ Data.Version.makeVersion [0,1,2,3]
 -- Just (Version {versionBranch = [0,1,3,3], versionTags = []})
+-- >>> safeIncrement patch $ Data.Version.makeVersion [0,1,2,maxBound]
+-- Nothing
 safeIncrement
     :: (Bounded field, Enum field, Eq field)
     => ((field -> Maybe field) -> a -> Maybe a)
@@ -565,6 +567,8 @@ safeIncrement l = l $ \v -> if v == maxBound then Nothing else Just (succ v)
 -- Version {versionBranch = [1,1,2,3], versionTags = []}
 -- >>> increment minor $ Data.Version.makeVersion [0,1,2,3]
 -- Version {versionBranch = [0,1,3,3], versionTags = []}
+-- >>> increment patch (Data.Version.makeVersion [0,1,2,maxBound]) == Data.Version.makeVersion [0,1,2,maxBound]
+-- True
 increment
     :: (Bounded field, Enum field, Eq field)
     => ((field -> Identity field) -> a -> Identity a)
@@ -603,7 +607,7 @@ increment l s = runIdentity (l (Identity . somewhatSafeSucc) s)
 -- PVP specification is available on <https://pvp.haskell.org/ pvp.haskell.org>.
 --
 -- Data type that represents PVP versions is called 'HaskellPvp.Version' and it
--- can be found in the <http://hackage.haskell.org/package/base base> package
+-- can be found in the <http://hackage.haskell.org/package/base base package>
 -- in its "Data.Version" module.
 --
 -- == Jenkins Versioning Scheme

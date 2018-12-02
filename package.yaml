@@ -3,9 +3,10 @@ version: 0.0.1.0
 synopsis: Common patterns used for application main.
 description: Common patterns used for application @main@.
 maintainer: Peter Trško <peter.trsko@gmail.com>
+copyright: (c) 2017-2018 Peter Trško
 license: BSD3
 github: trskop/mainplate
-category: System, Text
+category: System, Options, CLI
 
 extra-source-files:
   - ChangeLog.md
@@ -39,6 +40,7 @@ dependencies:
   - text
   - verbosity
   - yaml
+  - terminfo
 
   # Other packages:
   - host-and-port
