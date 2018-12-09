@@ -1,13 +1,17 @@
+{-# LANGUAGE DeriveAnyClass #-}
 {-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE DerivingStrategies #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE NoImplicitPrelude #-}
+{-# LANGUAGE PatternSynonyms #-}
 {-# LANGUAGE TypeFamilies #-}
 -- |
 -- Module:      Data.Output
 -- Description: Data type representing application (normal) output.
--- Copyright:   (c) 2017 Peter Trško
+-- Copyright:   (c) 2017-2018 Peter Trško
 -- License:     BSD3
 --
 -- Maintainer:  peter.trsko@gmail.com
@@ -26,11 +30,26 @@ module Data.Output
     , setOutput
     , modifyOutput
 
-    -- * Stdout or File
+    -- * OutputFile
+    , OutputFile(..)
+
+    -- * Handle
+    , OutputHandle(..)
+
+    -- ** OutputStdoutOrFile
+    , StdoutOnly
     , OutputStdoutOrFile
+    , pattern OutputStdoutOnly
+
+    -- ** OutputStdoutOrStderrOrFile
+    , StdoutOrStderr
+    , OutputStdoutOrStderrOrFile
+    , pattern OutputStdout
+    , pattern OutputStderr
     )
   where
 
+import Data.Bifunctor (Bifunctor(bimap, first, second))
 import Data.Either (Either(Right))
 import Data.Eq (Eq)
 import Data.Function ((.), id)
@@ -42,16 +61,67 @@ import GHC.Generics (Generic)
 import System.IO (FilePath)
 import Text.Show (Show)
 
+import qualified Dhall (Inject, Interpret)
 import System.FilePath.Parse (parseFilePath)
 
+
+newtype OutputFile = OutputFile {outputFile :: FilePath}
+  deriving stock (Eq, Generic, Show)
+  deriving newtype (IsOutput)
+  deriving anyclass (Dhall.Interpret)
+  -- TODO: Instance for Dhall.Inject
+
+-- {{{ OutputHandle -----------------------------------------------------------
+
+data StdoutOnly = StdoutOnly
+  deriving stock (Eq, Generic, Show)
+  deriving anyclass (Dhall.Inject, Dhall.Interpret)
+
+data StdoutOrStderr = Stdout | Stderr
+  deriving stock (Eq, Generic, Show)
+  deriving anyclass (Dhall.Inject, Dhall.Interpret)
+
+data OutputHandle handle a
+    = OutputHandle handle
+    | OutputNotHandle a
+  deriving stock (Eq, Generic, Show)
+  deriving anyclass (Dhall.Inject, Dhall.Interpret)
+
+instance Functor (OutputHandle handle) where
+    fmap f = \case
+        OutputHandle handle -> OutputHandle handle
+        OutputNotHandle a   -> OutputNotHandle (f a)
+
+instance Bifunctor OutputHandle where
+    bimap f g = \case
+        OutputHandle    a -> OutputHandle (f a)
+        OutputNotHandle b -> OutputNotHandle (g b)
+
+    first f = \case
+        OutputHandle    a -> OutputHandle (f a)
+        OutputNotHandle b -> OutputNotHandle b
+
+    second f = \case
+        OutputHandle    a -> OutputHandle a
+        OutputNotHandle b -> OutputNotHandle (f b)
+
+-- }}} OutputHandle -----------------------------------------------------------
 
 -- {{{ OutputStdoutOrFile -----------------------------------------------------
 
 -- | Output is either a file or a stdout.
-data OutputStdoutOrFile
-    = OutputStdout
-    | OutputFile FilePath
-  deriving (Eq, Generic, Show)
+type OutputStdoutOrFile = OutputHandle StdoutOnly OutputFile
+
+type OutputStdoutOrStderrOrFile = OutputHandle StdoutOrStderr OutputFile
+
+pattern OutputStdoutOnly :: OutputHandle StdoutOnly a
+pattern OutputStdoutOnly = OutputHandle StdoutOnly
+
+pattern OutputStdout :: OutputHandle StdoutOrStderr a
+pattern OutputStdout = OutputHandle Stdout
+
+pattern OutputStderr :: OutputHandle StdoutOrStderr a
+pattern OutputStderr = OutputHandle Stderr
 
 -- }}} OutputStdoutOrFile -----------------------------------------------------
 
@@ -65,13 +135,13 @@ instance IsOutput FilePath where
 
 -- |
 -- @
--- \"-\" -> 'Right' 'OutputStdout'
+-- \"-\" -> 'Right' 'OutputStdoutOnly'
 -- str -> 'OutputFile' '<$>' 'parseOutput' str
 -- @
-instance IsOutput OutputStdoutOrFile where
+instance IsOutput (OutputHandle StdoutOnly OutputFile) where
     parseOutput = \case
-        "-" -> Right OutputStdout
-        s   -> OutputFile <$> parseOutput s
+        "-" -> Right OutputStdoutOnly
+        s   -> OutputNotHandle . OutputFile <$> parseOutput s
 
 instance (IsOutput (Output a), HasOutput a) => IsOutput (a -> a) where
     parseOutput = fmap setOutput . parseOutput
@@ -84,8 +154,14 @@ class IsOutput (Output a) => HasOutput a where
     type Output a :: *
     output :: (Functor f, Output a ~ out) => (out -> f out) -> a -> f a
 
-instance HasOutput OutputStdoutOrFile where
-    type Output OutputStdoutOrFile = OutputStdoutOrFile
+instance HasOutput OutputFile where
+    type Output OutputFile = OutputFile
+    output = id
+
+instance HasOutput (OutputHandle StdoutOnly OutputFile) where
+    type Output (OutputHandle StdoutOnly OutputFile) =
+        OutputHandle StdoutOnly OutputFile
+
     output = id
 
 getOutput :: (Output a ~ output, HasOutput a) => a -> output
