@@ -189,7 +189,7 @@ runAppWith
     -- for it to find and parse configuration file.
     --
     -- When function returns @Left String@ then the string is wrapped in
-    -- 'ReadConfigException' and thrown. If the function throws an excepthin,
+    -- 'ReadConfigException' and thrown. If the function throws an exception,
     -- then that exception is also wrapped in 'ReadConfigException'. Purpose of
     -- this is to add more meaning to the error\/exception.
     -> (Endo (mode config) -> IO (mode config))
