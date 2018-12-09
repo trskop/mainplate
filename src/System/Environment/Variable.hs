@@ -1,4 +1,6 @@
+{-# LANGUAGE DeriveAnyClass #-}
 {-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE DerivingStrategies #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE NoImplicitPrelude #-}
@@ -39,10 +41,8 @@ data EnvironmentVariable = EnvironmentVariable
     { name :: EnvVarName
     , value :: EnvVarValue
     }
-  deriving (Eq, Generic, Ord, Read, Show)
-
-instance Dhall.Inject EnvironmentVariable
-instance Dhall.Interpret EnvironmentVariable
+  deriving stock (Eq, Generic, Ord, Read, Show)
+  deriving anyclass (Dhall.Inject, Dhall.Interpret)
 
 fromTuple :: (EnvVarName, EnvVarValue) -> EnvironmentVariable
 fromTuple (name, value) = EnvironmentVariable{name, value}

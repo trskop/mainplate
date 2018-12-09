@@ -1,4 +1,6 @@
+{-# LANGUAGE DeriveAnyClass #-}
 {-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE DerivingStrategies #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE NoImplicitPrelude #-}
 {-# LANGUAGE OverloadedStrings #-}
@@ -55,10 +57,8 @@ data ColourOutput
     -- ^ Use colourised output when the output is a terminal that supports it.
     | Never
     -- ^ Never produce colourised output.
-  deriving (Generic, Show)
-
-instance Dhall.Inject ColourOutput
-instance Dhall.Interpret ColourOutput
+  deriving stock (Eq, Generic, Show)
+  deriving anyclass (Dhall.Inject, Dhall.Interpret)
 
 -- | Parse a string representation of 'ColourOutput'.  This differs from what
 -- 'Show' is producing since by default we are parsing lower-case version
