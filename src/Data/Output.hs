@@ -143,8 +143,10 @@ instance IsOutput (OutputHandle StdoutOnly OutputFile) where
         "-" -> Right OutputStdoutOnly
         s   -> OutputNotHandle . OutputFile <$> parseOutput s
 
-instance (IsOutput (Output a), HasOutput a) => IsOutput (a -> a) where
-    parseOutput = fmap setOutput . parseOutput
+-- Find a better way:
+--
+--instance (IsOutput (Output a), HasOutput a) => IsOutput (a -> a) where
+--    parseOutput = fmap setOutput . parseOutput
 
 -- }}} IsOutput ---------------------------------------------------------------
 

@@ -113,15 +113,17 @@ instance IsConfigFilePath a => IsConfigFilePath (Maybe a) where
 instance IsConfigFilePath ConfigFile where
     parseConfigFilePath = fmap configFile . parseConfigFilePath
 
-instance
-    ( Semigroup (ConfigFilePath a)
-    , IsConfigFilePath (ConfigFilePath a)
-    , HasConfigFilePath a
-    ) => IsConfigFilePath (a -> a)
-  where
-    parseConfigFilePath = fmap modify . parseConfigFilePath
-      where
-        modify path = modifyConfigFilePath (<> path)
+-- Find a better way:
+--
+--instance
+--    ( Semigroup (ConfigFilePath a)
+--    , IsConfigFilePath (ConfigFilePath a)
+--    , HasConfigFilePath a
+--    ) => IsConfigFilePath (a -> a)
+--  where
+--    parseConfigFilePath = fmap modify . parseConfigFilePath
+--      where
+--        modify path = modifyConfigFilePath (<> path)
 
 -- }}} IsConfigFilePath -------------------------------------------------------
 
