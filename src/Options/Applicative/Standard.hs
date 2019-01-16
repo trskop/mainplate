@@ -1,6 +1,7 @@
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE NoImplicitPrelude #-}
+{-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE TypeSynonymInstances #-}
 -- |
@@ -72,6 +73,7 @@ import Data.String (String)
 import Data.Word (Word)
 import Text.Show (show)
 
+import qualified Data.CaseInsensitive as CI (mk)
 import Data.HostAndPort.Class (Host, HasHost, setHost, Port, HasPort, setPort)
 import Data.HostAndPort.Parse
     ( ParsedHost
@@ -397,15 +399,20 @@ verbosity = mconcat
     , help "Set verbosity level to VERBOSITY."
     ]
 
--- | Parse verbosity value and set it. These are recognized values: "silent",
--- "normal", "verbose", and "annoying".
+-- | Parse verbosity value and set it. These are recognized values: \"silent\",
+-- \"normal\", \"verbose\", \"annoying\", and \"quiet\" as an alias for
+-- \"silent\".
 parseVerbosity :: HasVerbosity a => ReadM (a -> a)
 parseVerbosity = eitherReader $ \s ->
-    maybe (invalidVerbosity s) (Right . setVerbosity) $ Verbosity.parse s
+    case CI.mk s of
+        "quiet" -> setVerbosity' Silent
+        s'      -> maybe (invalidVerbosity s) setVerbosity' $ Verbosity.parse s'
   where
     invalidVerbosity s = Left
         $ "Invalid verbosity: " <> show s <> ": Verbosity can be only one of: "
         <> show [minBound .. maxBound :: Verbosity]
+
+    setVerbosity' = Right . setVerbosity
 
 -- | Defined as:
 --
