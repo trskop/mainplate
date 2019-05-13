@@ -33,7 +33,7 @@ dependencies:
   # Packages from Stackage+Hackage:
   - aeson
   - case-insensitive
-  - dhall
+  - dhall >= 1.23.0  # Functional support of Dhall Standard 7.0.0
   - filepath
   - mtl
   - network

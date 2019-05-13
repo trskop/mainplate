@@ -1,4 +1,4 @@
 let ColourOutput : Type =
-      <Always : {} | Auto : {} | Never : {} >
+      <Always | Auto | Never >
 
 in  ColourOutput

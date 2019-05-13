@@ -3,9 +3,9 @@ let ColourOutput = ./Type/ColourOutput.dhall
 let fold
       : ∀(r : Type)
       → ∀ (handler
-            : { Always : {} → r
-              , Auto : {} → r
-              , Never : {} → r
+            : { Always : r
+              , Auto : r
+              , Never : r
               }
           )
       → ∀(colourOutput : ColourOutput)
@@ -13,9 +13,9 @@ let fold
 
       = λ(r : Type)
       → λ(handler
-            : { Always : {} → r
-              , Auto : {} → r
-              , Never : {} → r
+            : { Always : r
+              , Auto : r
+              , Never : r
               }
           )
       → λ(colourOutput : ColourOutput)
@@ -28,14 +28,11 @@ let -- Usage example:
     -- → "ls --color=${toText colourOutput}"
     -- ```
     toText = fold Text
-      { Always = λ(_ : {}) → "always"
-      , Auto = λ(_ : {}) → "auto"
-      , Never = λ(_ : {}) → "never"
+      { Always = "always"
+      , Auto = "auto"
+      , Never = "never"
       }
 
-in  { always = ColourOutput.Always {=} : ColourOutput
-    , auto = ColourOutput.Auto {=} : ColourOutput
-    , never = ColourOutput.Never {=} : ColourOutput
-    , fold = fold
+in  { fold = fold
     , toText = toText
     }
