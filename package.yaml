@@ -11,6 +11,8 @@ category: System, Options, CLI
 extra-source-files:
   - ChangeLog.md
   - README.md
+  - dhall/ColourOutput/*
+  - dhall/EnvironmentVariable/*
 
 ghc-options:
   - -Wall
