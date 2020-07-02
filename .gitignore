@@ -96,9 +96,6 @@ cabal.project.local
 
 # {{{ Local ###################################################################
 
-# Let user's decide what Stack config they want to use.
-stack.yaml
-
 # Using hpack, i.e. package.yaml.
 mainplate.cabal
 

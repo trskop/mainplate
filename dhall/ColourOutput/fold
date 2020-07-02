@@ -17,13 +17,13 @@ let ColourOutput =
       ? ./Type
 
 let fold
-    :   ∀(r : Type)
-      → ∀(handler : { Always : r, Auto : r, Never : r })
-      → ∀(colourOutput : ColourOutput)
-      → r
-    =   λ(r : Type)
-      → λ(handler : { Always : r, Auto : r, Never : r })
-      → λ(colourOutput : ColourOutput)
-      → merge handler colourOutput
+    : ∀(r : Type) →
+      ∀(handler : { Always : r, Auto : r, Never : r }) →
+      ∀(colourOutput : ColourOutput) →
+        r
+    = λ(r : Type) →
+      λ(handler : { Always : r, Auto : r, Never : r }) →
+      λ(colourOutput : ColourOutput) →
+        merge handler colourOutput
 
 in  fold

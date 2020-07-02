@@ -2,16 +2,17 @@
 # https://docs.haskellstack.org/en/stable/yaml_configuration/
 
 # (GHC 8.6.5)
-resolver: lts-13.23
+resolver: lts-16.3
 
 packages:
   - .
-  - location:
-      git: https://github.com/trskop/host-and-port
-      commit: f4639d63f5c2e4c4faef94f5214111625af2a85d
-    extra-dep: true
 
 extra-deps:
-  - dhall-1.23.0
+  - dhall-1.33.1
+  - repline-0.4.0.0
+  - haskeline-0.8.0.0
+
+  - git: https://github.com/trskop/host-and-port
+    commit: 67a38bd04c7385542706da7d80822b1a35e76322
 
 flags: {}

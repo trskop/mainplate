@@ -5,18 +5,18 @@ let EnvironmentVariable =
       ? ./Type
 
 let Monoid =
-      https://prelude.dhall-lang.org/Monoid sha256:26fafa098600ef7a54ef9dba5ada416bbbdd21df1af306c052420c61553ad4af
+      https://prelude.dhall-lang.org/v17.0.0/Monoid sha256:26fafa098600ef7a54ef9dba5ada416bbbdd21df1af306c052420c61553ad4af
 
 let fold
-    :   ∀(r : Type)
-      → ∀(monoid : Monoid r)
-      → ∀(convert : { name : Text → r, value : Text → r })
-      → ∀(var : EnvironmentVariable)
-      → r
-    =   λ(r : Type)
-      → λ(monoid : Monoid r)
-      → λ(convert : { name : Text → r, value : Text → r })
-      → λ(var : EnvironmentVariable)
-      → monoid [ convert.name var.name, convert.value var.value ]
+    : ∀(r : Type) →
+      ∀(monoid : Monoid r) →
+      ∀(convert : { name : Text → r, value : Text → r }) →
+      ∀(var : EnvironmentVariable) →
+        r
+    = λ(r : Type) →
+      λ(monoid : Monoid r) →
+      λ(convert : { name : Text → r, value : Text → r }) →
+      λ(var : EnvironmentVariable) →
+        monoid [ convert.name var.name, convert.value var.value ]
 
 in  fold

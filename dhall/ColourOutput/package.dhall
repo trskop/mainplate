@@ -22,11 +22,10 @@ let consistency1 = assert : test ColourOutput.Auto ≡ { t = "auto", s = "Auto" 
 let consistency2 =
       assert : test ColourOutput.Never ≡ { t = "never", s = "Never" }
 
-in  { Type =
-        ColourOutput
+in  { Type = ColourOutput
     , fold =
           ./fold sha256:a020d0af0e820105754b9ebb4d891d6fbed4aef8511a2a148cc1303261ca5388
         ? ./fold
-    , toText = toText
-    , show = show
+    , toText
+    , show
     }
