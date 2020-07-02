@@ -13,6 +13,6 @@ extra-deps:
   - haskeline-0.8.0.0
 
   - git: https://github.com/trskop/host-and-port
-    commit: 67a38bd04c7385542706da7d80822b1a35e76322
+    commit: 485702f898c83a210818504e087b3525e32e480f
 
 flags: {}
