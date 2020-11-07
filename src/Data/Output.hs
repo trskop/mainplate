@@ -1,17 +1,9 @@
 {-# LANGUAGE DeriveAnyClass #-}
-{-# LANGUAGE DeriveGeneric #-}
-{-# LANGUAGE DerivingStrategies #-}
-{-# LANGUAGE FlexibleContexts #-}
-{-# LANGUAGE FlexibleInstances #-}
-{-# LANGUAGE GeneralizedNewtypeDeriving #-}
-{-# LANGUAGE LambdaCase #-}
-{-# LANGUAGE NoImplicitPrelude #-}
 {-# LANGUAGE PatternSynonyms #-}
-{-# LANGUAGE TypeFamilies #-}
 -- |
 -- Module:      Data.Output
 -- Description: Data type representing application (normal) output.
--- Copyright:   (c) 2017-2018 Peter Trško
+-- Copyright:   (c) 2017-2020 Peter Trško
 -- License:     BSD3
 --
 -- Maintainer:  peter.trsko@gmail.com
@@ -56,36 +48,38 @@ import Data.Function ((.), id)
 import Data.Functor (Functor, (<$>), fmap)
 import Data.Functor.Const (Const(Const, getConst))
 import Data.Functor.Identity (Identity(Identity, runIdentity))
+import Data.Kind (Type)
+import Data.Maybe (Maybe(Just))
+import Data.Semigroup (Option(Option))
 import Data.String (String)
 import GHC.Generics (Generic)
 import System.IO (FilePath)
 import Text.Show (Show)
 
-import qualified Dhall (Inject, Interpret)
+import Dhall (FromDhall, ToDhall)
 import System.FilePath.Parse (parseFilePath)
 
 
 newtype OutputFile = OutputFile {outputFile :: FilePath}
   deriving stock (Eq, Generic, Show)
   deriving newtype (IsOutput)
-  deriving anyclass (Dhall.Interpret)
-  -- TODO: Instance for Dhall.Inject
+  deriving newtype (FromDhall, ToDhall)
 
 -- {{{ OutputHandle -----------------------------------------------------------
 
 data StdoutOnly = StdoutOnly
   deriving stock (Eq, Generic, Show)
-  deriving anyclass (Dhall.Inject, Dhall.Interpret)
+  deriving anyclass (FromDhall, ToDhall)
 
 data StdoutOrStderr = Stdout | Stderr
   deriving stock (Eq, Generic, Show)
-  deriving anyclass (Dhall.Inject, Dhall.Interpret)
+  deriving anyclass (FromDhall, ToDhall)
 
 data OutputHandle handle a
     = OutputHandle handle
     | OutputNotHandle a
   deriving stock (Eq, Generic, Show)
-  deriving anyclass (Dhall.Inject, Dhall.Interpret)
+  deriving anyclass (FromDhall, ToDhall)
 
 instance Functor (OutputHandle handle) where
     fmap f = \case
@@ -133,6 +127,12 @@ class IsOutput a where
 instance IsOutput FilePath where
     parseOutput = parseFilePath
 
+instance IsOutput a => IsOutput (Maybe a) where
+    parseOutput = fmap Just . parseOutput
+
+instance IsOutput a => IsOutput (Option a) where
+    parseOutput = fmap Option . parseOutput
+
 -- |
 -- @
 -- \"-\" -> 'Right' 'OutputStdoutOnly'
@@ -153,7 +153,7 @@ instance IsOutput (OutputHandle StdoutOnly OutputFile) where
 -- {{{ HasOutput --------------------------------------------------------------
 
 class IsOutput (Output a) => HasOutput a where
-    type Output a :: *
+    type Output a :: Type
     output :: (Functor f, Output a ~ out) => (out -> f out) -> a -> f a
 
 instance HasOutput OutputFile where

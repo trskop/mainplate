@@ -1,41 +1,66 @@
 name: mainplate
-version: 0.0.1.0
+version: !include ./version.yaml
 synopsis: Common patterns used for application main.
 description: Common patterns used for application @main@.
 maintainer: Peter Trško <peter.trsko@gmail.com>
-copyright: (c) 2017-2018 Peter Trško
+copyright: (c) 2017-2020 Peter Trško
 license: BSD3
+license-file: LICENSE
 github: trskop/mainplate
 category: System, Options, CLI
 
 extra-source-files:
   - ChangeLog.md
   - README.md
-  - dhall/ColourOutput/*
-  - dhall/EnvironmentVariable/*
+  - dhall/**/*.dhall
 
 ghc-options:
   - -Wall
+  - -Wcompat
+  - -Wimplicit-prelude
+  - -Wmissing-import-lists
 
-when:
-  - condition: impl(GHC >8)
-    then:
-      ghc-options:
-        - -Wimplicit-prelude
-        - -Wmissing-import-lists
-    else:
-      # At some point these option will become obsolete.
-      ghc-options:
-        - -fwarn-implicit-prelude
-        - -fwarn-missing-import-lists
+default-extensions:
+  - BlockArguments
+  - DeriveFunctor
+  - DeriveGeneric
+  - DerivingStrategies
+  - DuplicateRecordFields
+  - FlexibleContexts
+  - FlexibleInstances
+  - GeneralizedNewtypeDeriving
+  - InstanceSigs
+  - LambdaCase
+  - MultiParamTypeClasses
+  - NamedFieldPuns
+  - NoImplicitPrelude
+  - OverloadedStrings
+  - RankNTypes
+  - RecordWildCards
+  - ScopedTypeVariables
+  - TypeApplications
+  - TypeFamilies
 
 dependencies:
-  - base >=4.7 && <5
+  - base >=4.9 && <5
+  # ^ Version 4.9.0.0 is bundled with GHC 8.0.
 
   # Packages from Stackage+Hackage:
   - aeson
   - case-insensitive
-  - dhall >= 1.23.0  # Functional support of Dhall Standard 7.0.0
+  - dhall >= 1.33.0
+  # ^ Inject/Interpret were renamed to ToDhall/FromDhall in version 1.27.0
+  # (standard 11.0.0), we can't go below that now as we use the new names.
+  #
+  # Bultins `Optional/{fold,build}` were removed in version 1.33.0 (standard
+  # 17.0.0), while this should not affect the code here, it does make binary
+  # serialisation incompatible when it comes to more complicated use cases. To
+  # prevent major issues we need to depend on at least this version.
+  #
+  # Version 1.36.0 added `Text/replace` and made `with` a first class citizen.
+  # While we may want to depend on these features in the future, if we limit
+  # our selves to standard 17.0.0 we should still be compatible, unlike in the
+  # case of removed `Optional/{fold,build}`.
   - filepath
   - mtl
   - network
@@ -49,7 +74,7 @@ dependencies:
   - yaml
 
   # Other packages:
-  - host-and-port
+  - host-and-port >=0.0.1.0 && <1
 
 library:
   source-dirs: src

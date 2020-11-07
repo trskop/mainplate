@@ -8,7 +8,7 @@
 -- Module:      Data.Output.Colour
 -- Description: Data type representing user preferences for using colourised
 --              output.
--- Copyright:   (c) 2018 Peter Trško
+-- Copyright:   (c) 2018-2020 Peter Trško
 -- License:     BSD3
 --
 -- Maintainer:  peter.trsko@gmail.com
@@ -41,7 +41,7 @@ import Data.String (IsString)
 import GHC.Generics (Generic)
 import Text.Show (Show)
 
-import qualified Dhall (Inject, Interpret)
+import Dhall (FromDhall, ToDhall)
 import System.Console.Terminfo (Terminal, getCapability, termColors)
 
 import System.Environment.Parser (ParseEnv, optionalVar)
@@ -63,7 +63,7 @@ data ColourOutput
     | Never
     -- ^ Never produce colourised output.
   deriving stock (Eq, Generic, Show)
-  deriving anyclass (Dhall.Inject, Dhall.Interpret)
+  deriving anyclass (FromDhall, ToDhall)
 
 -- | Show 'ColourOutput' as a (generic) lower-case string.  It is possible to
 -- use 'Show' instance of 'ColourOutput' instead, however, this function is
@@ -170,8 +170,8 @@ terminalSupportsColours
     -- and 'System.Console.Terminfo.Base.setupTermFromEnv'.
     -> Bool
     -- ^
-    -- * 'False' - No, the terminal doesn't support colours.
-    -- * 'True' - Yes, the terminal does support colours.
+    -- [If 'False']: then no, the terminal doesn't support colours.
+    -- [If 'True']: then yes, the terminal does support colours.
 terminalSupportsColours term = isJust (getCapability term termColors)
 
 -- | Evaluate 'ColourOutput' by resolving 'Auto' case using provided predicate.

@@ -1,14 +1,7 @@
-{-# LANGUAGE DeriveGeneric #-}
-{-# LANGUAGE FlexibleContexts #-}
-{-# LANGUAGE FlexibleInstances #-}
-{-# LANGUAGE LambdaCase #-}
-{-# LANGUAGE NoImplicitPrelude #-}
-{-# LANGUAGE ScopedTypeVariables #-}
-{-# LANGUAGE TypeFamilies #-}
 -- |
 -- Module:      Data.ConfigFile
 -- Description: Configuration file
--- Copyright:   (c) 2017 Peter Trško
+-- Copyright:   (c) 2017-2020 Peter Trško
 -- License:     BSD3
 --
 -- Maintainer:  peter.trsko@gmail.com
@@ -48,6 +41,7 @@ import Data.Function ((.), id)
 import Data.Functor (Functor, (<$>), fmap)
 import Data.Functor.Const (Const(Const, getConst))
 import Data.Functor.Identity (Identity(Identity, runIdentity))
+import Data.Kind (Type)
 import Data.Maybe (Maybe(Just, Nothing))
 import Data.Monoid (Last(Last), Monoid(mempty, mappend))
 import Data.Semigroup (Semigroup((<>)))
@@ -59,6 +53,7 @@ import Text.Show (Show)
 
 import Data.Aeson (FromJSON)
 import qualified Data.Yaml as Yaml (ParseException, decodeFileEither)
+import Dhall (FromDhall, ToDhall)
 import System.FilePath (normalise)
 
 import System.FilePath.Parse (parseFilePath)
@@ -68,7 +63,8 @@ import System.FilePath.Parse (parseFilePath)
 
 -- | Optional file path to configuration file.
 newtype ConfigFile = ConfigFile {getConfigFile :: Maybe FilePath}
-  deriving (Eq, Generic, Show)
+  deriving stock (Eq, Generic, Show)
+  deriving newtype (FromDhall, ToDhall)
 
 -- | Smart constructor for 'ConfigFile':
 --
@@ -81,12 +77,17 @@ configFile = ConfigFile . \case
     "" -> Nothing
     s  -> Just (normalise s)
 
--- |
+-- | Same semantics as @'Semigroup' ('Last' 'FilePath')@.
+--
 -- >>> configFile "foo" <> configFile "bar"
 -- ConfigFile (Just "bar")
 instance Semigroup ConfigFile where
     (<>) = coerce ((<>) :: Last FilePath -> Last FilePath -> Last FilePath)
 
+-- | Same semantics as @'Monoid' ('Last' 'FilePath')@.
+--
+-- >>> mempty :: ConfigFile
+-- ConfigFile Nothing
 instance Monoid ConfigFile where
     mempty = ConfigFile Nothing
     mappend = (<>)
@@ -130,10 +131,10 @@ instance IsConfigFilePath ConfigFile where
 -- {{{ HasConfigFilePath ------------------------------------------------------
 
 class IsConfigFilePath (ConfigFilePath a) => HasConfigFilePath a where
-    type ConfigFilePath a :: *
+    type ConfigFilePath a :: Type
 
-    -- | Lens for accessing value of type @'ConfigFilePath' a :: *@ inside type
-    -- @a :: *@.
+    -- | Lens for accessing value of @'ConfigFilePath' a :: Type@ inside
+    -- @a :: Type@.
     configFilePath
         :: (Functor f, ConfigFilePath a ~ configFile)
         => (configFile -> f configFile)
@@ -172,7 +173,8 @@ modifyConfigFilePath f s = runIdentity (configFilePath (coerce f) s)
 
 -- | Parse YAML configuration file(s).
 --
--- Type @t :: * -> *@ is usually specialised to 'Identity', 'Maybe' or @[]@.
+-- Type @t :: Type -> Type@ is usually specialised to 'Identity', 'Maybe' or
+-- @[]@.
 parseYamlConfig
     :: forall a configFile config io t
     .   ( HasConfigFilePath a

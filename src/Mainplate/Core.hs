@@ -1,10 +1,7 @@
-{-# LANGUAGE CPP #-}
-{-# LANGUAGE NoImplicitPrelude #-}
-{-# LANGUAGE RankNTypes #-}
 -- |
 -- Module:      Mainplate.Core
 -- Description: Common patterns used for application @main@.
--- Copyright:   (c) 2017 Peter Trško
+-- Copyright:   (c) 2017-2020 Peter Trško
 -- License:     BSD3
 --
 -- Maintainer:  peter.trsko@gmail.com

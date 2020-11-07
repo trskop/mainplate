@@ -1,16 +1,16 @@
 -- vim: filetype=dhall
 
 let ColourOutput =
-        ./Type sha256:0ef91a3f044406ee80fc20f26127b448a0e98f46c46ec024457023d2aded8543
-      ? ./Type
+        ./Type.dhall sha256:0ef91a3f044406ee80fc20f26127b448a0e98f46c46ec024457023d2aded8543
+      ? ./Type.dhall
 
 let toText =
-        ./toText sha256:51d22acdc9b32f757e9170ae7c2cf244ce0488aa839dada9ee38bb3f1ee4d7bf
-      ? ./toText
+        ./toText.dhall sha256:51d22acdc9b32f757e9170ae7c2cf244ce0488aa839dada9ee38bb3f1ee4d7bf
+      ? ./toText.dhall
 
 let show =
-        ./show sha256:185d165dc7953ca951e11a3815853cbb9c81a2a555ad3f959735094f98a346b1
-      ? ./show
+        ./show.dhall sha256:185d165dc7953ca951e11a3815853cbb9c81a2a555ad3f959735094f98a346b1
+      ? ./show.dhall
 
 let test = λ(_ : ColourOutput) → { t = toText _, s = show _ }
 
@@ -24,8 +24,8 @@ let consistency2 =
 
 in  { Type = ColourOutput
     , fold =
-          ./fold sha256:a020d0af0e820105754b9ebb4d891d6fbed4aef8511a2a148cc1303261ca5388
-        ? ./fold
+          ./fold.dhall sha256:a020d0af0e820105754b9ebb4d891d6fbed4aef8511a2a148cc1303261ca5388
+        ? ./fold.dhall
     , toText
     , show
     }

@@ -1,15 +1,8 @@
-{-# LANGUAGE DeriveFunctor #-}
-{-# LANGUAGE DeriveGeneric #-}
-{-# LANGUAGE LambdaCase #-}
-{-# LANGUAGE NoImplicitPrelude #-}
-{-# LANGUAGE RankNTypes #-}
-{-# LANGUAGE RecordWildCards #-}
-{-# LANGUAGE ScopedTypeVariables #-}
 -- |
 -- Module:      Mainplate.Extensible
 -- Description: Extensible application where subcommands can be added using
 --              separate executables.
--- Copyright:   (c) 2017 Peter Trško
+-- Copyright:   (c) 2017-2020 Peter Trško
 -- License:     BSD3
 --
 -- Maintainer:  peter.trsko@gmail.com
@@ -39,7 +32,7 @@ import Control.Exception (SomeException, throwIO)
 import Data.Either (Either)
 import Data.Eq (Eq)
 import Data.Functor (Functor)
-import Data.Function (($), (.))
+import Data.Function ((.))
 import Data.Monoid (Endo)
 import Data.String (String)
 import GHC.Generics (Generic, Generic1)
@@ -85,7 +78,7 @@ runExtensibleAppWith
     -- ^ Run action that is implemented internally.
     -> IO ()
 runExtensibleAppWith parseOpts appDefaults readConfig runExternal runInternal =
-    runAppWith parseOpts appDefaults readConfig $ \case
+    runAppWith parseOpts appDefaults readConfig \case
         Internal internalAction config -> runInternal internalAction config
         External externalAction config -> runExternal externalAction config
 
@@ -163,8 +156,8 @@ runExternalProcess
     -> ExternalCommand
     -> config
     -> IO ()
-runExternalProcess = runExternalCommand $ \(createProcess, processExitCode) ->
-    withCreateProcess createProcess $ \_ _ _ ->
+runExternalProcess = runExternalCommand \(createProcess, processExitCode) ->
+    withCreateProcess createProcess \_ _ _ ->
         waitForProcess >=> processExitCode
 
 -- | Helper function for processing 'ExitCode' returned by an external command.

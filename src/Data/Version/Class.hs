@@ -1,11 +1,8 @@
-{-# LANGUAGE FlexibleContexts #-}
-{-# LANGUAGE NoImplicitPrelude #-}
-{-# LANGUAGE TypeFamilies #-}
 -- |
 -- Module:      Data.ApplicationVersion
 -- Description: Various type classes for use with version numbers represented
 --              as data types.
--- Copyright:   (c) 2017 Peter Trško
+-- Copyright:   (c) 2017-2020 Peter Trško
 -- License:     BSD3
 --
 -- Maintainer:  peter.trsko@gmail.com
@@ -112,6 +109,7 @@ import Data.Functor (Functor, (<$>))
 import Data.Functor.Const (Const(Const, getConst))
 import Data.Functor.Identity (Identity(Identity, runIdentity))
 import Data.Int (Int)
+import Data.Kind (Type)
 import Data.Maybe (Maybe(Nothing, Just))
 import Data.Monoid (Monoid)
 import Data.Ord (Ord)
@@ -143,7 +141,7 @@ import qualified Data.SemVer as Semantic.Version
 -- {{{ HasMajor ---------------------------------------------------------------
 
 class IsVersion a => HasMajor a where
-    type Major a :: *
+    type Major a :: Type
     major :: (Major a ~ major, Functor f) => (major -> f major) -> a -> f a
 
 instance HasMajor HaskellPvp.Version where
@@ -173,7 +171,7 @@ modifyMajor f s = runIdentity (major (coerce f) s)
 -- {{{ HasMinor ---------------------------------------------------------------
 
 class IsVersion a => HasMinor a where
-    type Minor a :: *
+    type Minor a :: Type
     minor :: (Minor a ~ minor, Functor f) => (minor -> f minor) -> a -> f a
 
 instance HasMinor HaskellPvp.Version where
@@ -204,7 +202,7 @@ modifyMinor f s = runIdentity (minor (coerce f) s)
 -- {{{ HasPatch ---------------------------------------------------------------
 
 class IsVersion a => HasPatch a where
-    type Patch a :: *
+    type Patch a :: Type
     patch :: (Patch a ~ patch, Functor f) => (patch -> f patch) -> a -> f a
 
 instance HasPatch HaskellPvp.Version where
@@ -236,7 +234,7 @@ modifyPatch f s = runIdentity (patch (coerce f) s)
 -- {{{ HasIteration -----------------------------------------------------------
 
 class IsVersion a => HasIteration a where
-    type Iteration a :: *
+    type Iteration a :: Type
     iteration
         :: (Iteration a ~ iteration, Functor f)
         => (iteration -> f iteration)
@@ -295,7 +293,7 @@ modifySprint = modifyIteration
 -- {{{ HasBuild ---------------------------------------------------------------
 
 class IsVersion a => HasBuild a where
-    type Build a :: *
+    type Build a :: Type
     build :: (Build a ~ build, Functor f) => (build -> f build) -> a -> f a
 
 getBuild :: (HasBuild a, Build a ~ build) => a -> build
@@ -312,7 +310,7 @@ modifyBuild f s = runIdentity (build (coerce f) s)
 -- {{{ HasGitCommit -----------------------------------------------------------
 
 class IsVersion a => HasGitCommit a where
-    type GitCommit a :: *
+    type GitCommit a :: Type
     gitCommit
         :: (GitCommit a ~ commit, Functor f)
         => (commit -> f commit)
@@ -335,7 +333,7 @@ modifyGitCommit f s = runIdentity (gitCommit (coerce f) s)
 -- {{{ HasRelease -------------------------------------------------------------
 
 class IsVersion a => HasRelease a where
-    type Release a :: *
+    type Release a :: Type
     release
         :: (Release a ~ release, Functor f)
         => (release -> f release)
@@ -394,8 +392,8 @@ class IsVersion a => CanBeProduction a where
 --   information see e.g. <https://en.wikipedia.org/wiki/Ubuntu_version_history>
 --   and <https://wiki.ubuntu.com/LTS>.
 class IsVersion a => CanBeLts a where
-    -- | Predicate that checks if version of type @a :: *@ is a LTS (Long Term
-    -- Support) version.
+    -- | Predicate that checks if version of type @a :: Type@ is a LTS (Long
+    -- Term Support) version.
     isLts :: a -> Bool
 
 -- | Applications, or even operating systems, may provide so called _stable_
@@ -408,7 +406,8 @@ class IsVersion a => CanBeLts a where
 --   (testing and unstable) have only code names. For more information see
 --   <https://www.debian.org/releases/>.
 class IsVersion a => CanBeStable a where
-    -- | Predicate that checks if version of type @a :: *@ is a stable version.
+    -- | Predicate that checks if version of type @a :: Type@ is a stable
+    -- version.
     isStable :: a -> Bool
 
 -- }}} Predicates -------------------------------------------------------------
@@ -477,9 +476,9 @@ toLazyTextWith buffSize = Text.Builder.toLazyTextWith buffSize . toBuilder
 -- {{{ HasVersion -------------------------------------------------------------
 
 class IsVersion (Version a) => HasVersion a where
-    type Version a :: *
+    type Version a :: Type
 
-    -- | Lens for accessing @version :: *@ value stored in type @a :: *@.
+    -- | Lens for accessing @version :: Type@ value stored in type @a :: Type@.
     version
         :: (Version a ~ version, Functor f)
         => (version -> f version)
@@ -515,7 +514,7 @@ modifyVersion f s = runIdentity (version (coerce f) s)
 -- useful for example in situations where package Cabal\/hpack config is
 -- generated.
 class IsVersion a => ToPvpVersion a where
-    -- | Convert version value of type @a :: *@ into 'HaskellPvp.Version'
+    -- | Convert version value of type @a :: Type@ into 'HaskellPvp.Version'
     -- (standard Haskell\/Cabal version that follows
     -- <https://pvp.haskell.org/ PVP specification>).
     toPvpVersion :: a -> HaskellPvp.Version

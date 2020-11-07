@@ -1,10 +1,10 @@
 cabal-version: 1.12
 
--- This file has been generated from package.yaml by hpack version 0.31.2.
+-- This file has been generated from package.yaml by hpack version 0.33.0.
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 4a164628a0d8c89411aac66b128563071ea0dd432caf448da3674c4d0f552191
+-- hash: d7a0845dd41a153f57dcf71a4bd8da0920882f37efbc5471791cf23b820a1d1e
 
 name:           mainplate
 version:        0.0.1.0
@@ -14,22 +14,23 @@ category:       System, Options, CLI
 homepage:       https://github.com/trskop/mainplate#readme
 bug-reports:    https://github.com/trskop/mainplate/issues
 maintainer:     Peter Trško <peter.trsko@gmail.com>
-copyright:      (c) 2017-2018 Peter Trško
+copyright:      (c) 2017-2020 Peter Trško
 license:        BSD3
 license-file:   LICENSE
 build-type:     Simple
 extra-source-files:
     ChangeLog.md
     README.md
-    dhall/ColourOutput/fold
+    dhall/ColourOutput/fold.dhall
     dhall/ColourOutput/package.dhall
-    dhall/ColourOutput/show
-    dhall/ColourOutput/toText
-    dhall/ColourOutput/Type
-    dhall/EnvironmentVariable/fold
+    dhall/ColourOutput/show.dhall
+    dhall/ColourOutput/toText.dhall
+    dhall/ColourOutput/Type.dhall
+    dhall/EnvironmentVariable/fold.dhall
     dhall/EnvironmentVariable/package.dhall
-    dhall/EnvironmentVariable/toText
-    dhall/EnvironmentVariable/Type
+    dhall/EnvironmentVariable/toText.dhall
+    dhall/EnvironmentVariable/Type.dhall
+    dhall/package.dhall
 
 source-repository head
   type: git
@@ -53,14 +54,15 @@ library
       Paths_mainplate
   hs-source-dirs:
       src
-  ghc-options: -Wall
+  default-extensions: BlockArguments DeriveFunctor DeriveGeneric DerivingStrategies DuplicateRecordFields FlexibleContexts FlexibleInstances GeneralizedNewtypeDeriving InstanceSigs LambdaCase MultiParamTypeClasses NamedFieldPuns NoImplicitPrelude OverloadedStrings RankNTypes RecordWildCards ScopedTypeVariables TypeApplications TypeFamilies
+  ghc-options: -Wall -Wcompat -Wimplicit-prelude -Wmissing-import-lists
   build-depends:
       aeson
-    , base >=4.7 && <5
+    , base >=4.9 && <5
     , case-insensitive
-    , dhall >=1.23.0
+    , dhall >=1.33.0
     , filepath
-    , host-and-port
+    , host-and-port >=0.0.1.0 && <1
     , mtl
     , network
     , optparse-applicative
@@ -71,8 +73,4 @@ library
     , unordered-containers
     , verbosity
     , yaml
-  if impl(GHC >8)
-    ghc-options: -Wimplicit-prelude -Wmissing-import-lists
-  else
-    ghc-options: -fwarn-implicit-prelude -fwarn-missing-import-lists
   default-language: Haskell2010
