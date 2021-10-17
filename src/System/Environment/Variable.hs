@@ -7,7 +7,7 @@
 -- |
 -- Module:      System.Environment.Variable
 -- Description: Representation of environment variables
--- Copyright:   (c) 2018 Peter Trško
+-- Copyright:   (c) 2018-2021 Peter Trško
 -- License:     BSD3
 --
 -- Maintainer:  peter.trsko@gmail.com
@@ -31,7 +31,7 @@ import Text.Read (Read)
 import Text.Show (Show)
 
 import Data.Text (Text)
-import qualified Dhall (Inject, Interpret)
+import Dhall (FromDhall, ToDhall)
 
 
 type EnvVarName = Text
@@ -42,7 +42,7 @@ data EnvironmentVariable = EnvironmentVariable
     , value :: EnvVarValue
     }
   deriving stock (Eq, Generic, Ord, Read, Show)
-  deriving anyclass (Dhall.Inject, Dhall.Interpret)
+  deriving anyclass (FromDhall, ToDhall)
 
 fromTuple :: (EnvVarName, EnvVarValue) -> EnvironmentVariable
 fromTuple (name, value) = EnvironmentVariable{name, value}
