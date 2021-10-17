@@ -8,7 +8,7 @@
 -- Module:      Data.Output.Colour
 -- Description: Data type representing user preferences for using colourised
 --              output.
--- Copyright:   (c) 2018-2020 Peter Trško
+-- Copyright:   (c) 2018-2021 Peter Trško
 -- License:     BSD3
 --
 -- Maintainer:  peter.trsko@gmail.com
@@ -28,21 +28,30 @@ module Data.Output.Colour
 
     -- * Terminal
     , terminalSupportsColours
+    , hUseColours
     )
   where
 
 import Control.Applicative (Applicative, pure)
-import Data.Bool (Bool(False, True))
+import Control.Monad.IO.Class (MonadIO, liftIO)
+import Data.Bool (Bool(False, True), (&&))
 import Data.Eq (Eq)
-import Data.Function (const)
+import Data.Function ((.), const)
 import Data.Functor ((<$>), fmap)
 import Data.Maybe (Maybe(Just, Nothing), isJust)
 import Data.String (IsString)
 import GHC.Generics (Generic)
 import Text.Show (Show)
+import System.IO (Handle, hIsTerminalDevice)
 
+import Control.Monad.Reader (ReaderT(ReaderT), runReaderT)
 import Dhall (FromDhall, ToDhall)
-import System.Console.Terminfo (Terminal, getCapability, termColors)
+import System.Console.Terminfo
+    ( Terminal
+    , getCapability
+    , setupTermFromEnv
+    , termColors
+    )
 
 import System.Environment.Parser (ParseEnv, optionalVar)
 
@@ -119,7 +128,7 @@ parse = \case
 -- | Check for presence of @NO_COLOR@ environment variable. If present, then
 -- set `ColourOutput` value to `Never`, otherwise keep it as it was.
 --
--- @NO_COLOR@ einvironment variable is an informal standard which is available
+-- @NO_COLOR@ environment variable is an informal standard which is available
 -- online at <https://no-color.org>.
 --
 -- > Accepting the futility of trying to reverse this trend, an informal
@@ -182,7 +191,7 @@ terminalSupportsColours term = isJust (getCapability term termColors)
 -- 'useColoursWhen' 'terminalSupportsColours'
 --    :: 'ColourOutput' -> 'Terminal' -> 'Bool'
 --
--- 'useColoursWhen' ('terminalSupportsColours' \<$> 'System.Console.Terminfo.Base.setupTermFromEnv')
+-- 'useColoursWhen' ('terminalSupportsColours' \<$> 'setupTermFromEnv')
 --    :: 'ColourOutput' -> IO 'Bool'
 -- @
 useColoursWhen
@@ -204,3 +213,18 @@ useColoursWhen figureItOut = \case
     Always -> pure True
     Auto -> figureItOut
     Never -> pure False
+
+-- | Evaluate `ColourOutput` by resolving `Auto` as, which is interpreted as
+-- `True` iff all of the following are true:
+--
+-- * `Handle` is attached to a terminal.
+--
+-- * Terimanal specified by @TERM@ environment variable supports colours.
+hUseColours :: forall io. MonadIO io => ColourOutput -> Handle -> io Bool
+hUseColours = runReaderT . useColoursWhen handleIsATerminalAndItSupportsColours
+  where
+    handleIsATerminalAndItSupportsColours :: ReaderT Handle io Bool
+    handleIsATerminalAndItSupportsColours = ReaderT \handle -> liftIO do
+        isTerminal <- hIsTerminalDevice handle
+        supportsColours <- terminalSupportsColours <$> setupTermFromEnv
+        pure (isTerminal && supportsColours)
