@@ -1,10 +1,10 @@
 cabal-version: 1.12
 
--- This file has been generated from package.yaml by hpack version 0.33.0.
+-- This file has been generated from package.yaml by hpack version 0.34.4.
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: d7a0845dd41a153f57dcf71a4bd8da0920882f37efbc5471791cf23b820a1d1e
+-- hash: 95bd426291874e2137b7c115a8290c01f31a69c306a5089ca83d5287eb068093
 
 name:           mainplate
 version:        0.0.1.0
@@ -14,7 +14,7 @@ category:       System, Options, CLI
 homepage:       https://github.com/trskop/mainplate#readme
 bug-reports:    https://github.com/trskop/mainplate/issues
 maintainer:     Peter Trško <peter.trsko@gmail.com>
-copyright:      (c) 2017-2020 Peter Trško
+copyright:      (c) 2017-2021 Peter Trško
 license:        BSD3
 license-file:   LICENSE
 build-type:     Simple
@@ -54,7 +54,26 @@ library
       Paths_mainplate
   hs-source-dirs:
       src
-  default-extensions: BlockArguments DeriveFunctor DeriveGeneric DerivingStrategies DuplicateRecordFields FlexibleContexts FlexibleInstances GeneralizedNewtypeDeriving InstanceSigs LambdaCase MultiParamTypeClasses NamedFieldPuns NoImplicitPrelude OverloadedStrings RankNTypes RecordWildCards ScopedTypeVariables TypeApplications TypeFamilies
+  default-extensions:
+      BlockArguments
+      DeriveFunctor
+      DeriveGeneric
+      DerivingStrategies
+      DuplicateRecordFields
+      FlexibleContexts
+      FlexibleInstances
+      GeneralizedNewtypeDeriving
+      InstanceSigs
+      LambdaCase
+      MultiParamTypeClasses
+      NamedFieldPuns
+      NoImplicitPrelude
+      OverloadedStrings
+      RankNTypes
+      RecordWildCards
+      ScopedTypeVariables
+      TypeApplications
+      TypeFamilies
   ghc-options: -Wall -Wcompat -Wimplicit-prelude -Wmissing-import-lists
   build-depends:
       aeson

@@ -3,7 +3,7 @@ version: !include ./version.yaml
 synopsis: Common patterns used for application main.
 description: Common patterns used for application @main@.
 maintainer: Peter Trško <peter.trsko@gmail.com>
-copyright: (c) 2017-2020 Peter Trško
+copyright: (c) 2017-2021 Peter Trško
 license: BSD3
 license-file: LICENSE
 github: trskop/mainplate
