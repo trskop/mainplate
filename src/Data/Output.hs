@@ -50,7 +50,6 @@ import Data.Functor.Const (Const(Const, getConst))
 import Data.Functor.Identity (Identity(Identity, runIdentity))
 import Data.Kind (Type)
 import Data.Maybe (Maybe(Just))
-import Data.Semigroup (Option(Option))
 import Data.String (String)
 import GHC.Generics (Generic)
 import System.IO (FilePath)
@@ -129,9 +128,6 @@ instance IsOutput FilePath where
 
 instance IsOutput a => IsOutput (Maybe a) where
     parseOutput = fmap Just . parseOutput
-
-instance IsOutput a => IsOutput (Option a) where
-    parseOutput = fmap Option . parseOutput
 
 -- |
 -- @
