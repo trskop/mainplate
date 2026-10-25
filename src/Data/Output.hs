@@ -1,9 +1,7 @@
-{-# LANGUAGE DeriveAnyClass #-}
-{-# LANGUAGE PatternSynonyms #-}
 -- |
 -- Module:      Data.Output
 -- Description: Data type representing application (normal) output.
--- Copyright:   (c) 2017-2020 Peter Trško
+-- Copyright:   (c) 2017-2026 Peter Trško
 -- License:     BSD3
 --
 -- Maintainer:  peter.trsko@gmail.com
@@ -51,6 +49,7 @@ import Data.Functor.Identity (Identity(Identity, runIdentity))
 import Data.Kind (Type)
 import Data.Maybe (Maybe(Just))
 import Data.String (String)
+import Data.Type.Equality (type (~))
 import GHC.Generics (Generic)
 import System.IO (FilePath)
 import Text.Show (Show)
@@ -81,19 +80,23 @@ data OutputHandle handle a
   deriving anyclass (FromDhall, ToDhall)
 
 instance Functor (OutputHandle handle) where
+    fmap :: (a -> b) -> OutputHandle handle a -> OutputHandle handle b
     fmap f = \case
         OutputHandle handle -> OutputHandle handle
         OutputNotHandle a   -> OutputNotHandle (f a)
 
 instance Bifunctor OutputHandle where
+    bimap :: (a -> b) -> (c -> d) -> OutputHandle a c -> OutputHandle b d
     bimap f g = \case
         OutputHandle    a -> OutputHandle (f a)
         OutputNotHandle b -> OutputNotHandle (g b)
 
+    first :: (a -> b) -> OutputHandle a c -> OutputHandle b c
     first f = \case
         OutputHandle    a -> OutputHandle (f a)
         OutputNotHandle b -> OutputNotHandle b
 
+    second :: (b -> c) -> OutputHandle a b -> OutputHandle a c
     second f = \case
         OutputHandle    a -> OutputHandle a
         OutputNotHandle b -> OutputNotHandle (f b)
@@ -124,9 +127,11 @@ class IsOutput a where
     parseOutput :: String -> Either String a
 
 instance IsOutput FilePath where
+    parseOutput :: String -> Either String FilePath
     parseOutput = parseFilePath
 
 instance IsOutput a => IsOutput (Maybe a) where
+    parseOutput :: String -> Either String (Maybe a)
     parseOutput = fmap Just . parseOutput
 
 -- |
@@ -135,6 +140,7 @@ instance IsOutput a => IsOutput (Maybe a) where
 -- str -> 'OutputFile' '<$>' 'parseOutput' str
 -- @
 instance IsOutput (OutputHandle StdoutOnly OutputFile) where
+    parseOutput :: String -> Either String (OutputHandle StdoutOnly OutputFile)
     parseOutput = \case
         "-" -> Right OutputStdoutOnly
         s   -> OutputNotHandle . OutputFile <$> parseOutput s
@@ -154,12 +160,24 @@ class IsOutput (Output a) => HasOutput a where
 
 instance HasOutput OutputFile where
     type Output OutputFile = OutputFile
+
+    output
+        :: Functor f
+        => (OutputFile -> f OutputFile)
+        -> OutputFile -> f OutputFile
     output = id
 
 instance HasOutput (OutputHandle StdoutOnly OutputFile) where
     type Output (OutputHandle StdoutOnly OutputFile) =
         OutputHandle StdoutOnly OutputFile
 
+    output
+        :: (Functor f, Output a ~ out)
+        =>  ( OutputHandle StdoutOnly OutputFile
+            -> f (OutputHandle StdoutOnly OutputFile)
+            )
+        -> OutputHandle StdoutOnly OutputFile
+        -> f (OutputHandle StdoutOnly OutputFile)
     output = id
 
 getOutput :: (Output a ~ output, HasOutput a) => a -> output

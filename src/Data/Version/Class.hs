@@ -2,7 +2,7 @@
 -- Module:      Data.ApplicationVersion
 -- Description: Various type classes for use with version numbers represented
 --              as data types.
--- Copyright:   (c) 2017-2020 Peter Trško
+-- Copyright:   (c) 2017-2026 Peter Trško
 -- License:     BSD3
 --
 -- Maintainer:  peter.trsko@gmail.com
@@ -114,7 +114,8 @@ import Data.Maybe (Maybe(Nothing, Just))
 import Data.Monoid (Monoid)
 import Data.Ord (Ord)
 import Data.String (IsString, fromString)
-import qualified Data.Version as HaskellPvp
+import Data.Type.Equality (type (~), )
+import Data.Version qualified as HaskellPvp
     ( Version(Version)
     , makeVersion
     , showVersion
@@ -122,12 +123,12 @@ import qualified Data.Version as HaskellPvp
 --import Data.Word (Word)
 
 import Data.Text (Text)
-import qualified Data.Text.Lazy as Lazy (Text)
-import qualified Data.Text.Lazy as Lazy.Text (toStrict, unpack)
-import qualified Data.Text.Lazy.Builder as Text (Builder)
-import qualified Data.Text.Lazy.Builder as Text.Builder (toLazyTextWith)
-import qualified Data.SemVer as Semantic (Version, major, minor, patch)
-import qualified Data.SemVer as Semantic.Version
+import Data.Text.Lazy qualified as Lazy (Text)
+import Data.Text.Lazy qualified as Lazy.Text (toStrict, unpack)
+import Data.Text.Lazy.Builder qualified as Text (Builder)
+import Data.Text.Lazy.Builder qualified as Text.Builder (toLazyTextWith)
+import Data.SemVer qualified as Semantic (Version, major, minor, patch)
+import Data.SemVer qualified as Semantic.Version
     ( isDevelopment
     , isPublic
     , major

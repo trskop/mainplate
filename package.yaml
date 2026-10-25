@@ -3,7 +3,7 @@ version: !include ./version.yaml
 synopsis: Common patterns used for application main.
 description: Common patterns used for application @main@.
 maintainer: Peter Trško <peter.trsko@gmail.com>
-copyright: (c) 2017-2021 Peter Trško
+copyright: (c) 2017-2026 Peter Trško
 license: BSD3
 license-file: LICENSE
 github: trskop/mainplate
@@ -15,31 +15,51 @@ extra-source-files:
   - dhall/**/*.dhall
 
 ghc-options:
-  - -Wall
-  - -Wcompat
-  - -Wimplicit-prelude
-  - -Wmissing-import-lists
+  - "-Wall"
+  - "-Wcompat" # GHC ≥8.0
+  - "-Wimplicit-prelude" # GHC ≥6.8
+  - "-Wmissing-deriving-strategies" # GHC ≥8.8
+  - "-Wmissing-export-lists" # GHC ≥8.4
+  - "-Wmissing-import-lists" # GHC ≥7.0
+  - "-Wprepositive-qualified-module" # GHC ≥8.10
 
 default-extensions:
-  - BlockArguments
-  - DeriveFunctor
-  - DeriveGeneric
-  - DerivingStrategies
-  - DuplicateRecordFields
-  - FlexibleContexts
-  - FlexibleInstances
-  - GeneralizedNewtypeDeriving
-  - InstanceSigs
-  - LambdaCase
-  - MultiParamTypeClasses
-  - NamedFieldPuns
-  - NoImplicitPrelude
-  - OverloadedStrings
-  - RankNTypes
-  - RecordWildCards
-  - ScopedTypeVariables
-  - TypeApplications
-  - TypeFamilies
+  - BlockArguments # GHC ≥8.6
+  - DeriveAnyClass # GHC ≥7.10
+  - DeriveFunctor # GHC ≥7.10
+  - DeriveGeneric # GHC ≥7.2
+  - DerivingStrategies # GHC ≥8.2
+  - DuplicateRecordFields # GHC ≥8.0
+  - ExplicitNamespaces # GHC ≥7.6
+  - FlexibleContexts # GHC ≥6.8
+  - FlexibleInstances # GHC ≥6.8
+  - GeneralizedNewtypeDeriving # GHC ≥6.8
+  - ImportQualifiedPost # GHC ≥8.10
+  - InstanceSigs # GHC ≥7.6
+  - LambdaCase # GHC ≥7.6
+  - MultiParamTypeClasses # GHC ≥6.8
+  - NamedFieldPuns # GHC ≥6.10
+  - NoImplicitPrelude # GHC ≥6.8
+  - OverloadedStrings # GHC ≥6.8
+  - PatternSynonyms # GHC ≥7.8
+  - RankNTypes # GHC ≥6.8
+  - RecordWildCards # GHC ≥6.8
+  - ScopedTypeVariables # GHC ≥6.8
+  - TypeApplications # GHC ≥8.0
+  - TypeFamilies # GHC ≥6.8
+  - TypeOperators # GHC ≥6.8
+
+flags:
+  pedantic:
+    description: |
+      Turn on additional warning flags
+    manual: true
+    default: false
+
+when:
+  - condition: flag(pedantic)
+    ghc-options:
+      - "-Werror" # GHC ≥6.8
 
 dependencies:
   - base >=4.9 && <5

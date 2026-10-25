@@ -1,21 +1,27 @@
 # For advanced use and comprehensive documentation of the format, please see:
 # https://docs.haskellstack.org/en/stable/yaml_configuration/
 
-# (GHC 8.8.4)
 resolver:
-  url: https://raw.githubusercontent.com/commercialhaskell/stackage-snapshots/master/lts/18/13.yaml
+  # GHC 8.10.7
+  #url: https://raw.githubusercontent.com/commercialhaskell/stackage-snapshots/master/lts/18/28.yaml
+  # GHC 9.4.8
+  #url: https://raw.githubusercontent.com/commercialhaskell/stackage-snapshots/master/lts/21/25.yaml
+  # GHC 9.6.6
+  #url: https://raw.githubusercontent.com/commercialhaskell/stackage-snapshots/master/lts/22/30.yaml
+  # GHC 9.6.7
+  url: https://raw.githubusercontent.com/commercialhaskell/stackage-snapshots/master/lts/22/44.yaml
 
 packages:
   - .
 
 extra-deps:
-  - aeson-yaml-1.1.0.0
-  - dhall-1.36.0
-  - haskeline-0.8.1.0
-  - prettyprinter-1.7.0
-  - repline-0.4.0.0
+  - aeson-yaml-1.1.0.1
+  - dhall-1.42.2
+  - haskeline-0.8.2.1
+  - prettyprinter-1.7.1
+  - repline-0.4.2.0
 
   - git: https://github.com/trskop/host-and-port
-    commit: 6ad44d8549822e12715531f860b17d0b608709d8
+    commit: b84aeaacf7208dee8b42d49dfa10ac16ef1278a4
 
 flags: {}

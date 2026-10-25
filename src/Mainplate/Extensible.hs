@@ -2,7 +2,7 @@
 -- Module:      Mainplate.Extensible
 -- Description: Extensible application where subcommands can be added using
 --              separate executables.
--- Copyright:   (c) 2017-2020 Peter Trško
+-- Copyright:   (c) 2017-2026 Peter Trško
 -- License:     BSD3
 --
 -- Maintainer:  peter.trsko@gmail.com
@@ -53,7 +53,7 @@ data Command externalAction internalAction conf
     -- application\/executable.
     | External externalAction conf
     -- ^ Represents action that is provided by an external application.
-  deriving (Eq, Functor, Generic, Generic1, Show)
+  deriving stock (Eq, Functor, Generic, Generic1, Show)
     -- TODO: Instances for Show1 and Eq1?
 
 -- | Template for application that uses external processes as extensions.
@@ -89,7 +89,7 @@ data ExternalCommand = ExternalCommand
     { executable :: String
     , options :: [String]
     }
-  deriving (Eq, Generic, Show)
+  deriving stock (Eq, Generic, Show)
 
 -- | Combinator for running external command.
 runExternalCommand

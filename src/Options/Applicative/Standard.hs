@@ -1,14 +1,8 @@
-{-# LANGUAGE FlexibleContexts #-}
-{-# LANGUAGE FlexibleInstances #-}
-{-# LANGUAGE NoImplicitPrelude #-}
-{-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE TypeFamilies #-}
-{-# LANGUAGE TypeSynonymInstances #-}
 -- |
 -- Module:      Options.Applicative.Standard
 -- Description: Standard\/common options and arguments used by command-line
 --              applications.
--- Copyright:   (c) 2017-2018 Peter Trško
+-- Copyright:   (c) 2017-2026 Peter Trško
 -- License:     BSD3
 --
 -- Maintainer:  peter.trsko@gmail.com
@@ -70,10 +64,11 @@ import Data.Functor (fmap)
 import Data.Maybe (maybe)
 import Data.Monoid ((<>), mconcat)
 import Data.String (String)
+import Data.Type.Equality (type (~))
 import Data.Word (Word)
 import Text.Show (show)
 
-import qualified Data.CaseInsensitive as CI (mk)
+import Data.CaseInsensitive qualified as CI (mk)
 import Data.HostAndPort.Class (Host, HasHost, setHost, Port, HasPort, setPort)
 import Data.HostAndPort.Parse
     ( ParsedHost
@@ -84,7 +79,7 @@ import Data.HostAndPort.Parse
     , parsePort
     )
 import Data.Verbosity (Verbosity(Silent, Verbose))
-import qualified Data.Verbosity as Verbosity (increment', parse)
+import Data.Verbosity qualified as Verbosity (increment', parse)
 import Data.Verbosity.Class (HasVerbosity, modifyVerbosity, setVerbosity)
 import Options.Applicative
     ( Mod
@@ -107,7 +102,7 @@ import Options.Applicative.Builder.Internal (HasMetavar, HasName)
 
 import Data.ConfigFile (IsConfigFilePath, parseConfigFilePath)
 import Data.Version.Class (IsVersion)
-import qualified Data.Version.Class as Version (toSomeString)
+import Data.Version.Class qualified as Version (toSomeString)
 import Data.Output (IsOutput, parseOutput)
 
 

@@ -1,14 +1,8 @@
-{-# LANGUAGE DeriveAnyClass #-}
-{-# LANGUAGE DeriveGeneric #-}
-{-# LANGUAGE DerivingStrategies #-}
-{-# LANGUAGE LambdaCase #-}
-{-# LANGUAGE NoImplicitPrelude #-}
-{-# LANGUAGE OverloadedStrings #-}
 -- |
 -- Module:      Data.Output.Colour
 -- Description: Data type representing user preferences for using colourised
 --              output.
--- Copyright:   (c) 2018-2021 Peter Trško
+-- Copyright:   (c) 2018-2026 Peter Trško
 -- License:     BSD3
 --
 -- Maintainer:  peter.trsko@gmail.com

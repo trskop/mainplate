@@ -1,16 +1,7 @@
-{-# LANGUAGE BlockArguments #-}
-{-# LANGUAGE DeriveGeneric #-}
-{-# LANGUAGE DerivingStrategies #-}
-{-# LANGUAGE FlexibleInstances #-}
-{-# LANGUAGE GeneralizedNewtypeDeriving #-}
-{-# LANGUAGE MultiParamTypeClasses #-}
-{-# LANGUAGE NoImplicitPrelude #-}
-{-# LANGUAGE Rank2Types #-}
-{-# LANGUAGE TupleSections #-}
 -- |
 -- Module:      System.Environment.Parser
 -- Description: Parse environment variables.
--- Copyright:   (c) 2018-2021 Peter Trško
+-- Copyright:   (c) 2018-2026 Peter Trško
 -- License:     BSD3
 --
 -- Maintainer:  peter.trsko@gmail.com
@@ -42,17 +33,18 @@ module System.Environment.Parser
 
 import Control.Applicative (Alternative, Applicative, pure)
 import Control.Monad (Monad, MonadPlus, (>>=), when)
-import Control.Monad.IO.Class (MonadIO, liftIO)
 import Control.Monad.Fail (MonadFail(fail))
+import Control.Monad.IO.Class (MonadIO, liftIO)
 import Data.Bifunctor (bimap)
 import Data.Either (Either, either)
+import Data.Eq (Eq)
 import Data.Function (($), (.))
 import Data.Functor (Functor, (<$), (<$>), fmap)
 import Data.Functor.Identity (Identity(Identity))
-import Data.String (String, fromString)
-import Data.Semigroup (Semigroup((<>)))
 import Data.Maybe (Maybe, maybe)
 import Data.Monoid (Monoid(mempty))
+import Data.Semigroup (Semigroup((<>)))
+import Data.String (String, fromString)
 import GHC.Generics (Generic)
 import System.Environment (getEnvironment)
 import Text.Show (Show)
@@ -60,8 +52,8 @@ import Text.Show (Show)
 import Control.Monad.Reader (MonadReader(local, reader), ReaderT(ReaderT))
 import Control.Monad.Except (Except, ExceptT(ExceptT), MonadError, throwError)
 import Data.HashMap.Strict (HashMap)
-import qualified Data.HashMap.Strict as HashMap (fromList, lookup)
-import qualified Data.Text as Text (null)
+import Data.HashMap.Strict qualified as HashMap (fromList, lookup)
+import Data.Text qualified as Text (null)
 
 import System.Environment.Variable (EnvVarName, EnvVarValue)
 
@@ -72,13 +64,15 @@ data ParseEnvError
     | EmptyEnvVarError EnvVarName
     | ErrorMessage String
     | UnknownError
-  deriving stock (Generic, Show)
+  deriving stock (Eq, Generic, Show)
 
 instance Semigroup ParseEnvError where
+    (<>) :: ParseEnvError -> ParseEnvError -> ParseEnvError
     e <> UnknownError = e
     _ <> e            = e
 
 instance Monoid ParseEnvError where
+    mempty :: ParseEnvError
     mempty = UnknownError
 
 newtype ParseEnv context a = ParseEnv
@@ -97,12 +91,15 @@ newtype ParseEnv context a = ParseEnv
   deriving newtype (MonadError ParseEnvError)
 
 instance MonadFail (ParseEnv context) where
+    fail :: String -> ParseEnv context a
     fail = throwError . ErrorMessage
 
 instance MonadReader context (ParseEnv context) where
+    local :: (context -> context) -> ParseEnv context a -> ParseEnv context a
     local f (ParseEnv (ReaderT g)) = ParseEnv $ ReaderT \(env, context) ->
         g (env, f context)
 
+    reader :: (context -> a) -> ParseEnv context a
     reader f = ParseEnv $ ReaderT \(_, context) ->
         pure (f context)
 

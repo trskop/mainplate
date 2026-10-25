@@ -1,20 +1,18 @@
 cabal-version: 1.12
 
--- This file has been generated from package.yaml by hpack version 0.34.4.
+-- This file has been generated from package.yaml by hpack version 0.39.6.
 --
 -- see: https://github.com/sol/hpack
---
--- hash: 95bd426291874e2137b7c115a8290c01f31a69c306a5089ca83d5287eb068093
 
 name:           mainplate
-version:        0.0.1.0
+version:        0.0.2.0
 synopsis:       Common patterns used for application main.
 description:    Common patterns used for application @main@.
 category:       System, Options, CLI
 homepage:       https://github.com/trskop/mainplate#readme
 bug-reports:    https://github.com/trskop/mainplate/issues
 maintainer:     Peter Trško <peter.trsko@gmail.com>
-copyright:      (c) 2017-2021 Peter Trško
+copyright:      (c) 2017-2026 Peter Trško
 license:        BSD3
 license-file:   LICENSE
 build-type:     Simple
@@ -36,6 +34,11 @@ source-repository head
   type: git
   location: https://github.com/trskop/mainplate
 
+flag pedantic
+  description: Turn on additional warning flags
+  manual: True
+  default: False
+
 library
   exposed-modules:
       Data.ConfigFile
@@ -56,25 +59,30 @@ library
       src
   default-extensions:
       BlockArguments
+      DeriveAnyClass
       DeriveFunctor
       DeriveGeneric
       DerivingStrategies
       DuplicateRecordFields
+      ExplicitNamespaces
       FlexibleContexts
       FlexibleInstances
       GeneralizedNewtypeDeriving
+      ImportQualifiedPost
       InstanceSigs
       LambdaCase
       MultiParamTypeClasses
       NamedFieldPuns
       NoImplicitPrelude
       OverloadedStrings
+      PatternSynonyms
       RankNTypes
       RecordWildCards
       ScopedTypeVariables
       TypeApplications
       TypeFamilies
-  ghc-options: -Wall -Wcompat -Wimplicit-prelude -Wmissing-import-lists
+      TypeOperators
+  ghc-options: -Wall -Wcompat -Wimplicit-prelude -Wmissing-deriving-strategies -Wmissing-export-lists -Wmissing-import-lists -Wprepositive-qualified-module
   build-depends:
       aeson
     , base >=4.9 && <5
@@ -93,3 +101,5 @@ library
     , verbosity
     , yaml
   default-language: Haskell2010
+  if flag(pedantic)
+    ghc-options: -Werror
